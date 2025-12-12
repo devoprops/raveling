@@ -1,45 +1,96 @@
+
+ok we are going to work on some basic model components before we do any real app development. We are going to be building some python modules
+to support classes and methods for characters, items, and skills. The idea is to create working classes and then build a small test bed
+where we can do statistical analysis on all items, characters, skills, etc. For now, though lets just focus on 
+the classes and methods. Long term we will integrate it into a form where a config file is made from a class instance and can be integrated into
+a database. Let's focus on items for now
+
+Items will have at least the following attributes:
+a.	Item name
+b.	Short description
+c.	Long description
+d.	Item type: Weapon, wearable, consumable, (any other type to consider?)
+e. weight
+f. size
+g. material
+h. restrictions
+
+We will break down items into the following subclasses:
+
+wearable - this is equipment that can be worn to affect defense, skill or stat boosts, etc.
+Weapon - weapons will be a generic weapon class that has subclasses for:
+The main weapon class will have attributes of item  plus:
+1. damage nodes:  Damage nodes will be a list of classes of damage types and probabilities of execution.  For example a damage node class
+might be physical damage node, elemental damage node. Each damage node will have a damage model. These will leverage utilities for each type which is 
+a PDF or statistical distribution for: uniform, gaussian, skewnorm, bimodal, die roll (2d5, 1d4, etc). In this way, any kind of chain of models or mixed
+damage types can be added to the list of damage nodes. Say you have a flaming iron sword. You would have a 
+damage node type: primary (executes at notional rate), and one node type: secondary (executes at some probability rate). The first node would be a
+physical subtype with a damage model, and the second would be an elemental subtype (class would capture element type) with a damage model. 
+Additionally, a node type: 'skill'-executes a skill (another class), 'spell' - executes a spell (another class), or 'process' (another class) could be in the list.  
+
+a. ranged weapons - bows and throwables
+
+b. melee weapons - bladed, blunt, flailed
+
+The weapon methods will be things like calculate turn weapon effects, calculate turn weapon damage. 
+
+There will be an overarching skill class that is broken down into several subclasses:
+a. attack - again broken down into physical attack or elemental attack
+b. buff - increase stats or resistance or some other attriubute
+c. debuff - decrease stats or resistance or some other attriubutes
+c. regnerative - replenish hp, mana, etc.
+c. process - performs some specific or unique function (raise dead, etc.)
+
+each skill will have type and subtype.  Things like spell or skill are really just semantics, but with elemental descriptives being spells, 
+and physical descriptives being physical.
+
+Finally, let's get into character classes (Player Character (PC), and NPC)
+
 1.	Character
 a.	Name
 b.	Race
 c.	Stats
 d.	Skills
-i.	Standard actions
-ii.	Enhanced actions
-iii.	
-e.	restrictions
-2.	Item
-a.	Item name
-b.	Short description
-c.	Long description
-d.	Item type: Weapon, wearable
-3.	Damage models
-a.	Gaussian
-b.	Uniform
-c.	Skewnorm (left or right)
-d.	Bimodal
-e.	Trimodal
-4.	Weapon item
-a.	Weapon class: spear, slash, stab, bow, throw, club or mix
-b.	Damage models (list
-c.	Primary damage
-i.	Type: physical, magical
-ii.	Primary Damage model: Uniform, Gaussian, 
-d.	Auxiliary damage models: List of 
-i.	Type: physical, magical
-ii.	
-e.	Range
-f.	Slots
-g.	
-Notes
-Stat boost
-Skill add
-Spell add
-Rate/weight 
-Base mean
-Base std
-Weight
-Size
-Speed method
-Damage method 
-Messages 
-Damage model 
+e. type: PC, NPC
+They all have the same basic stats, 
+
+Skill and spells are heavily tied to stats and skill level rather than player level.  Spells and Skills are initially learned from spell books or purchasing training
+Stat impacts
+Str impacts Damage, weight carried, weapon speed/weight etc.
+constitution impacts hit regen
+Dex impacts speed, prob_hit, dodge, etc.
+Int impacts spell Speed, p_success, spell types
+Wis impacts Damage or magnitude effect, mana regen
+Luck is tied to most probability events
+Skill level 0-100 is a directly-used multiplier to the effect of a given skill, and increases based on use per above XP discussion
+Skills and spells may have certain entry minimum limitations like str, dex intelligence, or wis minimums to even train or learn.
+Magical effects p_success are heavily based on wis/int. Anyone of any 'class' can use a weapon or item with magical proc, but it won’t fire or have as much damage if you suck at int or wis.  
+Items are more restricted based on weight or stats-based constraints than level.  Not enough dex to use a type of bow effectively.  Not enough intelligence to learn a spell book stuff like that. 
+The idea is there can be some minimum requirements for items, skill, and spells, but the bigger impact is your stats. Let’s say the minimum intelligence for ‘magic missile’ is 20.  That means you can buy the spell book and learn it with 25 int, but your p_success and damage roll will probably suck until you improve int and wis. Minimum is basically barely capable, but hey, you can try. 
+
+Stats/attributes- all are 0-100
+Baseline stats are initially based on some “slightly below-average” race-based rolled distribution.  Say rolled with half of max as mean with std .1 * mean and 20 extra points for the player to distribute (on initiital roll):
+Str
+constitution
+Dex
+Int
+Wis
+Baseline stats have min/max determined by race. Only magical effects can temporarily raise. See link below for reference
+https://docs.google.com/spreadsheets/d/1cAFmQpochbkwMIr47UAhy9dIibRCjNHYtaIiKDljWNg/edit?usp=sharing 
+
+Auxiliary stats are as follows and start out with similar appropriate values. See 
+Physical Endurance- no fatigue, but  tie to HP regen
+Mental endurance - tie to Mana regen 
+Charisma - does this add value to a game?
+Luck- random initial draw…just luck of the draw, lol
+Eyesight - affects visible area starts around 50 by race
+Night Vision - starts around 10 unless race boost
+Any other race-based stat that might be useful (Stealth etc.)
+Elemental affinities - metal, water, wood, fire, earth (o-100) in addition to the impact of intelligence and wisdom on spells, the 
+elemental affinities add or detract from specific elemental usage
+Elemental limitations - negative impacts to the use of elemental this can be used to create characters that are, say susceptible to fire etc
+
+character classes carry both a list of skills as well as skill level. This would be a skill/level pairing attribute map
+
+Let's consider all of this for now and what a good structure for these classes, utilities, etc should be.  
+Any utility that is generic (probability distribution models, etc.) shoud be kept in a folder under 'utils/common'

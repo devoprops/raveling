@@ -1,0 +1,140 @@
+"""Constants for the MUD game model components."""
+
+# Stat names
+STR = "str"
+CONSTITUTION = "constitution"
+DEX = "dex"
+INT = "int"
+WIS = "wis"
+LUCK = "luck"
+PHYSICAL_ENDURANCE = "physical_endurance"
+MENTAL_ENDURANCE = "mental_endurance"
+CHARISMA = "charisma"
+EYESIGHT = "eyesight"
+NIGHT_VISION = "night_vision"
+STEALTH = "stealth"
+
+# Core stats list
+CORE_STATS = [STR, CONSTITUTION, DEX, INT, WIS, LUCK]
+
+# Auxiliary stats list
+AUXILIARY_STATS = [
+    PHYSICAL_ENDURANCE,
+    MENTAL_ENDURANCE,
+    CHARISMA,
+    EYESIGHT,
+    NIGHT_VISION,
+    STEALTH,
+]
+
+# Item types
+ITEM_TYPE_WEAPON = "weapon"
+ITEM_TYPE_WEARABLE = "wearable"
+ITEM_TYPE_CONSUMABLE = "consumable"
+ITEM_TYPES = [ITEM_TYPE_WEAPON, ITEM_TYPE_WEARABLE, ITEM_TYPE_CONSUMABLE]
+
+# Weapon types
+WEAPON_TYPE_MELEE = "melee"
+WEAPON_TYPE_RANGED = "ranged"
+WEAPON_TYPES = [WEAPON_TYPE_MELEE, WEAPON_TYPE_RANGED]
+
+# Melee weapon subtypes
+MELEE_BLADED = "bladed"
+MELEE_BLUNT = "blunt"
+MELEE_FLAILED = "flailed"
+MELEE_SUBTYPES = [MELEE_BLADED, MELEE_BLUNT, MELEE_FLAILED]
+
+# Ranged weapon subtypes
+RANGED_BOW = "bow"
+RANGED_THROWABLE = "throwable"
+RANGED_SUBTYPES = [RANGED_BOW, RANGED_THROWABLE]
+
+# Skill types
+SKILL_TYPE_ATTACK = "attack"
+SKILL_TYPE_BUFF = "buff"
+SKILL_TYPE_DEBUFF = "debuff"
+SKILL_TYPE_REGENERATIVE = "regenerative"
+SKILL_TYPE_PROCESS = "process"
+SKILL_TYPES = [
+    SKILL_TYPE_ATTACK,
+    SKILL_TYPE_BUFF,
+    SKILL_TYPE_DEBUFF,
+    SKILL_TYPE_REGENERATIVE,
+    SKILL_TYPE_PROCESS,
+]
+
+# Attack skill subtypes
+ATTACK_PHYSICAL = "physical"
+ATTACK_ELEMENTAL = "elemental"
+ATTACK_SUBTYPES = [ATTACK_PHYSICAL, ATTACK_ELEMENTAL]
+
+# Elemental types
+ELEMENT_METAL = "metal"
+ELEMENT_WATER = "water"
+ELEMENT_WOOD = "wood"
+ELEMENT_FIRE = "fire"
+ELEMENT_EARTH = "earth"
+ELEMENTS = [ELEMENT_METAL, ELEMENT_WATER, ELEMENT_WOOD, ELEMENT_FIRE, ELEMENT_EARTH]
+
+# Damage node types
+DAMAGE_NODE_PRIMARY = "primary"
+DAMAGE_NODE_SECONDARY = "secondary"
+DAMAGE_NODE_SKILL = "skill"
+DAMAGE_NODE_SPELL = "spell"
+DAMAGE_NODE_PROCESS = "process"
+DAMAGE_NODE_TYPES = [
+    DAMAGE_NODE_PRIMARY,
+    DAMAGE_NODE_SECONDARY,
+    DAMAGE_NODE_SKILL,
+    DAMAGE_NODE_SPELL,
+    DAMAGE_NODE_PROCESS,
+]
+
+# Character types
+CHARACTER_TYPE_PC = "PC"
+CHARACTER_TYPE_NPC = "NPC"
+CHARACTER_TYPES = [CHARACTER_TYPE_PC, CHARACTER_TYPE_NPC]
+
+# Equipment slots
+SLOT_HEAD = "head"
+SLOT_CHEST = "chest"
+SLOT_LEGS = "legs"
+SLOT_FEET = "feet"
+SLOT_HANDS = "hands"
+SLOT_MAIN_HAND = "main_hand"
+SLOT_OFF_HAND = "off_hand"
+SLOT_RING = "ring"
+SLOT_AMULET = "amulet"
+EQUIPMENT_SLOTS = [
+    SLOT_HEAD,
+    SLOT_CHEST,
+    SLOT_LEGS,
+    SLOT_FEET,
+    SLOT_HANDS,
+    SLOT_MAIN_HAND,
+    SLOT_OFF_HAND,
+    SLOT_RING,
+    SLOT_AMULET,
+]
+
+# Stat ranges
+STAT_MIN = 0
+STAT_MAX = 100
+
+# Skill level ranges
+SKILL_LEVEL_MIN = 0
+SKILL_LEVEL_MAX = 100
+
+# Default values
+DEFAULT_STAT_VALUE = 50
+DEFAULT_SKILL_LEVEL = 0
+DEFAULT_EYESIGHT = 50
+DEFAULT_NIGHT_VISION = 10
+DEFAULT_ELEMENTAL_AFFINITY = 0
+
+# Regen types
+REGEN_TYPE_HP = "hp"
+REGEN_TYPE_MANA = "mana"
+REGEN_TYPE_STAMINA = "stamina"
+REGEN_TYPES = [REGEN_TYPE_HP, REGEN_TYPE_MANA, REGEN_TYPE_STAMINA]
+

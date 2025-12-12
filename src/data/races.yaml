@@ -1,0 +1,54 @@
+# Race data definitions for character stat initialization
+# Each race defines min/max stats, initial distribution parameters, and defaults
+
+races:
+  human:
+    stat_min:
+      str: 10
+      constitution: 10
+      dex: 10
+      int: 10
+      wis: 10
+      luck: 10
+    stat_max:
+      str: 100
+      constitution: 100
+      dex: 100
+      int: 100
+      wis: 100
+      luck: 100
+    initial_mean:
+      str: 50
+      constitution: 50
+      dex: 50
+      int: 50
+      wis: 50
+      luck: 50
+    initial_std:
+      str: 5
+      constitution: 5
+      dex: 5
+      int: 5
+      wis: 5
+      luck: 5
+    auxiliary_defaults:
+      physical_endurance: 50
+      mental_endurance: 50
+      charisma: 50
+      eyesight: 50
+      night_vision: 10
+      stealth: 50
+    elemental_affinities:
+      metal: 0
+      water: 0
+      wood: 0
+      fire: 0
+      earth: 0
+    elemental_limitations: {}
+
+  # Additional races can be added here following the same structure
+  # Example:
+  # elf:
+  #   stat_min: {...}
+  #   ...
+
