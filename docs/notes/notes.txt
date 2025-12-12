@@ -1,0 +1,45 @@
+1.	Character
+a.	Name
+b.	Race
+c.	Stats
+d.	Skills
+i.	Standard actions
+ii.	Enhanced actions
+iii.	
+e.	restrictions
+2.	Item
+a.	Item name
+b.	Short description
+c.	Long description
+d.	Item type: Weapon, wearable
+3.	Damage models
+a.	Gaussian
+b.	Uniform
+c.	Skewnorm (left or right)
+d.	Bimodal
+e.	Trimodal
+4.	Weapon item
+a.	Weapon class: spear, slash, stab, bow, throw, club or mix
+b.	Damage models (list
+c.	Primary damage
+i.	Type: physical, magical
+ii.	Primary Damage model: Uniform, Gaussian, 
+d.	Auxiliary damage models: List of 
+i.	Type: physical, magical
+ii.	
+e.	Range
+f.	Slots
+g.	
+Notes
+Stat boost
+Skill add
+Spell add
+Rate/weight 
+Base mean
+Base std
+Weight
+Size
+Speed method
+Damage method 
+Messages 
+Damage model 
