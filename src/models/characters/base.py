@@ -370,11 +370,11 @@ class Character:
                 return False
         
         # Check weight capacity
-        if hasattr(item, "weight"):
+        if hasattr(item, "weight_kg"):
             total_weight = sum(
-                i.weight for i in self.equipped_items.values() if hasattr(i, "weight")
+                i.weight_kg for i in self.equipped_items.values() if hasattr(i, "weight_kg")
             )
-            if total_weight + item.weight > self.get_weight_capacity():
+            if total_weight + item.weight_kg > self.get_weight_capacity():
                 return False
         
         return True

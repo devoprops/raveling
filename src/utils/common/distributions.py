@@ -1,7 +1,8 @@
 """Probability distribution utility functions for damage models and statistical calculations."""
 
 import random
-from typing import Callable, Union
+from typing import Callable, Union, Dict
+from collections import defaultdict
 
 
 def sample_uniform(min_val: float, max_val: float) -> float:
@@ -109,6 +110,45 @@ def sample_die_roll(notation: str) -> int:
         return total
     except (ValueError, IndexError) as e:
         raise ValueError(f"Invalid die notation: {notation}") from e
+
+
+def calculate_dice_probabilities(num_dice: int, num_sides: int) -> Dict[int, float]:
+    """
+    Calculate the exact probability distribution for rolling multiple dice.
+    
+    Uses dynamic programming to calculate all possible sums and their probabilities.
+    
+    Args:
+        num_dice: Number of dice to roll
+        num_sides: Number of sides on each die
+        
+    Returns:
+        Dictionary mapping sum values to their probabilities
+    """
+    # Dictionary to store the counts of each possible sum
+    # Keys are sums, values are the number of ways to get that sum
+    ways_to_roll = defaultdict(int)
+    ways_to_roll[0] = 1  # Start with one way to get a sum of 0 (by rolling 0 dice)
+    
+    # Iterate through each die
+    for _ in range(num_dice):
+        next_ways = defaultdict(int)
+        # For each possible sum from previous dice rolls
+        for current_sum, count in ways_to_roll.items():
+            # Add each possible side of the new die
+            for side in range(1, num_sides + 1):
+                next_ways[current_sum + side] += count
+        ways_to_roll = next_ways  # Update for the next iteration
+    
+    # Calculate total outcomes (num_sides^num_dice)
+    total_outcomes = num_sides ** num_dice
+    
+    # Calculate probabilities
+    probabilities = {}
+    for sum_val, count in ways_to_roll.items():
+        probabilities[sum_val] = count / total_outcomes
+    
+    return probabilities
 
 
 # Type alias for distribution functions

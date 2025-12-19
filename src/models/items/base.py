@@ -13,8 +13,9 @@ class Item:
         short_desc: Short description
         long_desc: Long description
         item_type: Type of item (weapon, wearable, consumable, etc.)
-        weight: Weight of the item
-        size: Size of the item
+        weight_kg: Weight of the item in kilograms
+        length_cm: Length of the item in centimeters
+        width_cm: Width of the item in centimeters
         material: Material the item is made from
         restrictions: Dictionary of restrictions (e.g., stat requirements)
     """
@@ -25,8 +26,9 @@ class Item:
         short_desc: str,
         long_desc: str,
         item_type: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
         restrictions: Optional[Dict[str, Any]] = None,
     ):
@@ -38,8 +40,9 @@ class Item:
             short_desc: Short description
             long_desc: Long description
             item_type: Type of item (must be in ITEM_TYPES)
-            weight: Weight of the item
-            size: Size of the item
+            weight_kg: Weight of the item in kilograms
+            length_cm: Length of the item in centimeters
+            width_cm: Width of the item in centimeters
             material: Material the item is made from
             restrictions: Optional dictionary of restrictions
         """
@@ -51,8 +54,9 @@ class Item:
             raise ValueError(f"Invalid item_type: {item_type}. Must be one of {ITEM_TYPES}")
         self.item_type = item_type
         
-        self.weight = weight
-        self.size = size
+        self.weight_kg = weight_kg
+        self.length_cm = length_cm
+        self.width_cm = width_cm
         self.material = material
         self.restrictions = restrictions or {}
     
@@ -72,8 +76,9 @@ class Item:
             "short_desc": self.short_desc,
             "long_desc": self.long_desc,
             "item_type": self.item_type,
-            "weight": self.weight,
-            "size": self.size,
+            "weight_kg": self.weight_kg,
+            "length_cm": self.length_cm,
+            "width_cm": self.width_cm,
             "material": self.material,
             "restrictions": self.restrictions,
         }

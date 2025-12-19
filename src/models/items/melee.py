@@ -1,8 +1,8 @@
 """Melee weapon subclasses."""
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional, List
 from src.models.items.weapon import Weapon
-from src.models.items.damage_node import DamageNode
+from src.models.items.functional_node import FunctionalNode
 from src.utils.constants import MELEE_BLADED, MELEE_BLUNT, MELEE_FLAILED
 
 
@@ -20,10 +20,12 @@ class BladedWeapon(Weapon):
         name: str,
         short_desc: str,
         long_desc: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
-        damage_nodes: list[DamageNode],
+        functional_nodes: List[FunctionalNode],
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         blade_length: float,
         sharpness: float,
         restrictions: Dict[str, Any] = None,
@@ -35,10 +37,12 @@ class BladedWeapon(Weapon):
             name: Weapon name
             short_desc: Short description
             long_desc: Long description
-            weight: Weight of the weapon
-            size: Size of the weapon
+            weight_kg: Weight of the weapon in kilograms
+            length_cm: Length of the weapon in centimeters
+            width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            damage_nodes: List of DamageNode instances
+            functional_nodes: List of FunctionalNode instances
+            slots: Optional dictionary of slot_name -> FunctionalNode
             blade_length: Length of the blade
             sharpness: Sharpness rating
             restrictions: Optional dictionary of restrictions
@@ -47,10 +51,12 @@ class BladedWeapon(Weapon):
             name=name,
             short_desc=short_desc,
             long_desc=long_desc,
-            weight=weight,
-            size=size,
+            weight_kg=weight_kg,
+            length_cm=length_cm,
+            width_cm=width_cm,
             material=material,
-            damage_nodes=damage_nodes,
+            functional_nodes=functional_nodes,
+            slots=slots,
             restrictions=restrictions,
         )
         self.blade_length = blade_length
@@ -94,10 +100,12 @@ class BluntWeapon(Weapon):
         name: str,
         short_desc: str,
         long_desc: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
-        damage_nodes: list[DamageNode],
+        functional_nodes: List[FunctionalNode],
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         impact_force: float,
         stun_chance: float = 0.0,
         restrictions: Dict[str, Any] = None,
@@ -109,10 +117,12 @@ class BluntWeapon(Weapon):
             name: Weapon name
             short_desc: Short description
             long_desc: Long description
-            weight: Weight of the weapon
-            size: Size of the weapon
+            weight_kg: Weight of the weapon in kilograms
+            length_cm: Length of the weapon in centimeters
+            width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            damage_nodes: List of DamageNode instances
+            functional_nodes: List of FunctionalNode instances
+            slots: Optional dictionary of slot_name -> FunctionalNode
             impact_force: Impact force rating
             stun_chance: Chance to stun target (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
@@ -121,10 +131,12 @@ class BluntWeapon(Weapon):
             name=name,
             short_desc=short_desc,
             long_desc=long_desc,
-            weight=weight,
-            size=size,
+            weight_kg=weight_kg,
+            length_cm=length_cm,
+            width_cm=width_cm,
             material=material,
-            damage_nodes=damage_nodes,
+            functional_nodes=functional_nodes,
+            slots=slots,
             restrictions=restrictions,
         )
         self.impact_force = impact_force
@@ -174,10 +186,12 @@ class FlailedWeapon(Weapon):
         name: str,
         short_desc: str,
         long_desc: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
-        damage_nodes: list[DamageNode],
+        functional_nodes: List[FunctionalNode],
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         chain_length: float,
         wrap_chance: float = 0.0,
         restrictions: Dict[str, Any] = None,
@@ -189,10 +203,12 @@ class FlailedWeapon(Weapon):
             name: Weapon name
             short_desc: Short description
             long_desc: Long description
-            weight: Weight of the weapon
-            size: Size of the weapon
+            weight_kg: Weight of the weapon in kilograms
+            length_cm: Length of the weapon in centimeters
+            width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            damage_nodes: List of DamageNode instances
+            functional_nodes: List of FunctionalNode instances
+            slots: Optional dictionary of slot_name -> FunctionalNode
             chain_length: Length of chain/flail
             wrap_chance: Chance to wrap around target (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
@@ -201,10 +217,12 @@ class FlailedWeapon(Weapon):
             name=name,
             short_desc=short_desc,
             long_desc=long_desc,
-            weight=weight,
-            size=size,
+            weight_kg=weight_kg,
+            length_cm=length_cm,
+            width_cm=width_cm,
             material=material,
-            damage_nodes=damage_nodes,
+            functional_nodes=functional_nodes,
+            slots=slots,
             restrictions=restrictions,
         )
         self.chain_length = chain_length

@@ -1,8 +1,8 @@
 """Ranged weapon subclasses."""
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from src.models.items.weapon import Weapon
-from src.models.items.damage_node import DamageNode
+from src.models.items.functional_node import FunctionalNode
 from src.utils.constants import RANGED_BOW, RANGED_THROWABLE
 
 
@@ -21,10 +21,12 @@ class Bow(Weapon):
         name: str,
         short_desc: str,
         long_desc: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
-        damage_nodes: list[DamageNode],
+        functional_nodes: List[FunctionalNode],
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         range: float,
         ammo_type: str,
         draw_strength: float,
@@ -37,10 +39,12 @@ class Bow(Weapon):
             name: Weapon name
             short_desc: Short description
             long_desc: Long description
-            weight: Weight of the weapon
-            size: Size of the weapon
+            weight_kg: Weight of the weapon in kilograms
+            length_cm: Length of the weapon in centimeters
+            width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            damage_nodes: List of DamageNode instances
+            functional_nodes: List of FunctionalNode instances
+            slots: Optional dictionary of slot_name -> FunctionalNode
             range: Maximum effective range
             ammo_type: Type of ammunition required
             draw_strength: Draw strength required
@@ -50,10 +54,12 @@ class Bow(Weapon):
             name=name,
             short_desc=short_desc,
             long_desc=long_desc,
-            weight=weight,
-            size=size,
+            weight_kg=weight_kg,
+            length_cm=length_cm,
+            width_cm=width_cm,
             material=material,
-            damage_nodes=damage_nodes,
+            functional_nodes=functional_nodes,
+            slots=slots,
             restrictions=restrictions,
         )
         self.range = range
@@ -126,10 +132,12 @@ class Throwable(Weapon):
         name: str,
         short_desc: str,
         long_desc: str,
-        weight: float,
-        size: float,
+        weight_kg: float,
+        length_cm: float,
+        width_cm: float,
         material: str,
-        damage_nodes: list[DamageNode],
+        functional_nodes: List[FunctionalNode],
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         range: float,
         return_chance: float = 0.0,
         restrictions: Dict[str, Any] = None,
@@ -141,10 +149,12 @@ class Throwable(Weapon):
             name: Weapon name
             short_desc: Short description
             long_desc: Long description
-            weight: Weight of the weapon
-            size: Size of the weapon
+            weight_kg: Weight of the weapon in kilograms
+            length_cm: Length of the weapon in centimeters
+            width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            damage_nodes: List of DamageNode instances
+            functional_nodes: List of FunctionalNode instances
+            slots: Optional dictionary of slot_name -> FunctionalNode
             range: Maximum effective range
             return_chance: Chance weapon returns after throw (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
@@ -153,10 +163,12 @@ class Throwable(Weapon):
             name=name,
             short_desc=short_desc,
             long_desc=long_desc,
-            weight=weight,
-            size=size,
+            weight_kg=weight_kg,
+            length_cm=length_cm,
+            width_cm=width_cm,
             material=material,
-            damage_nodes=damage_nodes,
+            functional_nodes=functional_nodes,
+            slots=slots,
             restrictions=restrictions,
         )
         self.range = range
