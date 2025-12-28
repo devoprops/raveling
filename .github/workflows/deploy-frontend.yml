@@ -31,11 +31,11 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://your-backend.railway.app' }}
       
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: './frontend'
-          command: pages deploy dist --project-name=raveling-frontend
+          command: deploy
 
