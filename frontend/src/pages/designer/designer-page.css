@@ -1,0 +1,36 @@
+.designer-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(233, 69, 96, 0.3);
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #e94560;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.page-subtitle {
+  margin: 0.5rem 0 0 0;
+  color: #c4c4c4;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+.page-content {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+  min-height: 400px;
+}
+

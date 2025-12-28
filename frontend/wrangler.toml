@@ -1,0 +1,11 @@
+# Cloudflare Pages configuration
+# Routes and custom domain are configured in Cloudflare Dashboard
+# This file is mainly for local development with wrangler
+
+name = "raveling-frontend"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = "./dist"
+

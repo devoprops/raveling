@@ -118,8 +118,6 @@ SLOT_CHEST = "chest"
 SLOT_LEGS = "legs"
 SLOT_FEET = "feet"
 SLOT_HANDS = "hands"
-SLOT_MAIN_HAND = "main_hand"
-SLOT_OFF_HAND = "off_hand"
 SLOT_RING = "ring"
 SLOT_AMULET = "amulet"
 EQUIPMENT_SLOTS = [
@@ -128,8 +126,6 @@ EQUIPMENT_SLOTS = [
     SLOT_LEGS,
     SLOT_FEET,
     SLOT_HANDS,
-    SLOT_MAIN_HAND,
-    SLOT_OFF_HAND,
     SLOT_RING,
     SLOT_AMULET,
 ]

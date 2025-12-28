@@ -1,0 +1,49 @@
+.designer-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0f1419;
+  color: #c4c4c4;
+}
+
+.designer-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.designer-main {
+  flex: 1;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 100%);
+  padding: 2rem;
+}
+
+/* Scrollbar styling for main content */
+.designer-main::-webkit-scrollbar {
+  width: 12px;
+}
+
+.designer-main::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.designer-main::-webkit-scrollbar-thumb {
+  background: rgba(233, 69, 96, 0.3);
+  border-radius: 6px;
+}
+
+.designer-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(233, 69, 96, 0.5);
+}
+
+@media (max-width: 768px) {
+  .designer-content {
+    flex-direction: column;
+  }
+  
+  .designer-main {
+    padding: 1rem;
+  }
+}
+
