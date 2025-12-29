@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = ["python313", "curl"]
+
+[phases.install]
+cmds = [
+  "curl -LsSf https://astral.sh/uv/install.sh | sh",
+  "export PATH=\"$HOME/.local/bin:$PATH\"",
+  "uv sync --frozen"
+]
+
+[start]
+cmd = "bash start.sh"
+
