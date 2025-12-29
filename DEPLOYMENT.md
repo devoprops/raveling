@@ -9,40 +9,67 @@ This guide covers setting up automated deployments for `raveling.devocosm.com`.
 3. Railway account
 4. Domain `devocosm.com` managed in Cloudflare
 
-## Step 1: Cloudflare Setup
+## Step 1: Cloudflare Workers Setup
 
-### Get Cloudflare API Token
+### Option A: Direct GitHub Integration (Recommended - Already Set Up)
+
+If you've already connected Cloudflare Workers to your GitHub repository directly:
+
+1. ✅ **Already Done**: Cloudflare Dashboard → Workers & Pages → Your Project
+   - Connected to GitHub repository
+   - Root directory set to `frontend`
+   - Build command: `npm install && npm run build`
+   - Deploy command: `npx wrangler deploy`
+
+2. **Configure Custom Domain** (if not done):
+   - In Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Domains
+   - Add custom domain: `raveling.devocosm.com`
+   - Cloudflare will automatically configure DNS
+
+3. **Set Environment Variables** (if needed):
+   - In Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Variables
+   - Add `VITE_API_URL` = Your Railway backend URL (e.g., `https://your-backend.railway.app`)
+
+### Option B: GitHub Actions Deployment (Alternative)
+
+If you prefer GitHub Actions instead of direct integration:
+
+#### Get Cloudflare API Token
 
 1. Go to Cloudflare Dashboard → My Profile → API Tokens
 2. Click "Create Token"
 3. Use "Edit Cloudflare Workers" template
 4. Set permissions:
-   - Account: `Cloudflare Pages:Edit`
+   - Account: `Workers:Edit`
    - Zone: `Workers:Edit` (for your domain)
 5. Copy the token
 
-### Get Cloudflare Account ID
+#### Get Cloudflare Account ID
 
 1. Go to Cloudflare Dashboard
 2. Select your account (right sidebar)
 3. Copy the Account ID
 
-### Add GitHub Secrets
+#### Add GitHub Secrets (Only if using GitHub Actions)
 
 In your GitHub repository:
 1. Go to Settings → Secrets and variables → Actions
-2. Add the following secrets:
+2. Add the following secrets (only needed if using GitHub Actions):
    - `CLOUDFLARE_API_TOKEN` - Your API token
    - `CLOUDFLARE_ACCOUNT_ID` - Your account ID
-   - `VITE_API_URL` - Your Railway backend URL (optional, can set in Cloudflare dashboard)
+   - `VITE_API_URL` - Your Railway backend URL (optional)
+
+**Note**: If using direct GitHub integration, you don't need these GitHub secrets.
 
 ### Configure DNS
 
-1. In Cloudflare Dashboard → DNS → Records
-2. Add a CNAME record:
+1. In Cloudflare Dashboard → DNS → Records (for `devocosm.com`)
+2. Add a CNAME record (if not auto-configured):
    - Name: `raveling`
-   - Target: Your Cloudflare Pages deployment URL (will be provided after first deploy)
+   - Target: Your Cloudflare Workers deployment URL (provided after first deploy, or check Workers & Pages → Your Project → Domains)
    - Proxy: ON (orange cloud)
+
+**Note**: If you added the custom domain in Workers settings, DNS may be auto-configured.
 
 ## Step 2: Railway Setup
 
@@ -90,21 +117,20 @@ In Railway Dashboard → Service → Variables:
 
 ## Step 3: First Deployment
 
-### Manual Frontend Deploy (First Time)
+### Frontend Deployment
 
-1. In Cloudflare Dashboard → Workers & Pages → Create application
-2. Select "Pages" → "Connect to Git"
-3. Connect your GitHub repository
-4. Configure:
-   - Project name: `raveling-frontend`
-   - Production branch: `main`
-   - Build command: `cd frontend && npm install && npm run build`
-   - Build output directory: `frontend/dist`
-5. Click "Save and Deploy"
+**If using Direct GitHub Integration (Recommended):**
+- ✅ Already configured - Cloudflare will auto-deploy on push to `main` branch
+- Push to `main` branch and Cloudflare will build and deploy automatically
+- Check deployment status in Cloudflare Dashboard → Workers & Pages → Your Project → Deployments
+
+**If using GitHub Actions:**
+- Push to `main` branch and GitHub Actions will deploy via Wrangler
+- Check deployment status in GitHub → Actions tab
 
 ### Backend Auto-Deploy
 
-Railway will automatically deploy when you push to `main` branch.
+Railway will automatically deploy when you push to `main` branch (if GitHub integration is connected).
 
 ## Step 4: Verify
 
@@ -115,10 +141,16 @@ Railway will automatically deploy when you push to `main` branch.
 
 ### Frontend Not Deploying
 
-- Check GitHub Actions logs
-- Verify `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets
+**If using Direct GitHub Integration:**
+- Check Cloudflare Dashboard → Workers & Pages → Your Project → Deployments → Build logs
+- Verify root directory is set to `frontend` in Settings → Source
+- Ensure `wrangler.toml` exists in `frontend/` directory
+- Check that build command is: `npm install && npm run build`
+
+**If using GitHub Actions:**
+- Check GitHub → Actions tab → Latest workflow run
+- Verify `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets are set
 - Ensure `wrangler.toml` is correct
-- Check build logs in Cloudflare dashboard
 
 ### Backend Not Deploying
 
@@ -142,7 +174,7 @@ If you need to deploy manually:
 cd frontend
 npm install
 npm run build
-npx wrangler pages deploy dist --project-name=raveling-frontend
+npx wrangler deploy --assets=./dist
 ```
 
 ### Backend

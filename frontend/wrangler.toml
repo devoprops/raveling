@@ -1,7 +1,7 @@
 # Cloudflare Workers configuration for static assets
 # Routes and custom domain are configured in Cloudflare Dashboard
 
-name = "raveling-frontend"
+name = "raveling"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
