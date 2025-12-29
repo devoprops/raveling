@@ -23,6 +23,9 @@ export default function Header() {
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/gameplay" className="nav-link">Gameplay</Link>
           <Link to="/designer" className="nav-link">Designer Suite</Link>
+          {user?.role === 'admin' && (
+            <Link to="/admin/users" className="nav-link admin-link">Admin</Link>
+          )}
         </nav>
 
         {user && (

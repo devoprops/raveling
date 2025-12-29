@@ -1,0 +1,226 @@
+.user-management {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.user-management-header h1 {
+  margin: 0;
+  color: #e94560;
+}
+
+.create-button {
+  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+}
+
+.users-table {
+  background: rgba(15, 20, 25, 0.6);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.users-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table thead {
+  background: rgba(233, 69, 96, 0.2);
+}
+
+.users-table th {
+  padding: 1rem;
+  text-align: left;
+  color: #e94560;
+  font-weight: bold;
+  border-bottom: 2px solid rgba(233, 69, 96, 0.3);
+}
+
+.users-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(233, 69, 96, 0.1);
+  color: #c4c4c4;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(233, 69, 96, 0.05);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.role-admin {
+  background: rgba(233, 69, 96, 0.3);
+  color: #ff6b9d;
+}
+
+.role-designer {
+  background: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.role-player {
+  background: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.role-viewer {
+  background: rgba(158, 158, 158, 0.3);
+  color: #9e9e9e;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.status-badge.inactive {
+  background: rgba(158, 158, 158, 0.3);
+  color: #9e9e9e;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.edit-button {
+  background: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.edit-button:hover {
+  background: rgba(255, 193, 7, 0.5);
+}
+
+.save-button {
+  background: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.save-button:hover {
+  background: rgba(76, 175, 80, 0.5);
+}
+
+.cancel-button {
+  background: rgba(158, 158, 158, 0.3);
+  color: #9e9e9e;
+}
+
+.cancel-button:hover {
+  background: rgba(158, 158, 158, 0.5);
+}
+
+.delete-button {
+  background: rgba(233, 69, 96, 0.3);
+  color: #ff6b9d;
+}
+
+.delete-button:hover {
+  background: rgba(233, 69, 96, 0.5);
+}
+
+.create-user-form {
+  background: rgba(15, 20, 25, 0.8);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.create-user-form h2 {
+  margin-top: 0;
+  color: #e94560;
+}
+
+.create-user-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.create-user-form label {
+  display: block;
+  color: #c4c4c4;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.create-user-form input[type="text"],
+.create-user-form input[type="email"],
+.create-user-form input[type="password"],
+.create-user-form select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.create-user-form input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.error-message {
+  background: rgba(233, 69, 96, 0.2);
+  border: 1px solid #e94560;
+  color: #ff6b9d;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  text-align: center;
+  color: #c4c4c4;
+  padding: 2rem;
+}
+

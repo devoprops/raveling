@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import RegistrationForm from './RegistrationForm';
 import './LoginForm.css';
 
 export default function LoginForm() {
+  const [showRegister, setShowRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,6 +24,10 @@ export default function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (showRegister) {
+    return <RegistrationForm onBack={() => setShowRegister(false)} />;
+  }
 
   return (
     <div className="login-container">
@@ -64,6 +70,10 @@ export default function LoginForm() {
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Logging in...' : 'Enter the Forge'}
           </button>
+          
+          <div className="register-link">
+            <p>Don't have an account? <button type="button" onClick={() => setShowRegister(true)} className="link-button">Create one</button></p>
+          </div>
         </form>
       </div>
     </div>

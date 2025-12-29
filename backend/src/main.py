@@ -15,7 +15,7 @@ else:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api import auth, items, skills, characters, approval
+from src.api import auth, items, skills, characters, approval, users
 app = FastAPI(
     title="Raveling MUD API",
     description="Backend API for Raveling MUD Designer and Game",
@@ -36,6 +36,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(items.router, prefix="/api/items", tags=["items"])
 app.include_router(skills.router, prefix="/api/skills", tags=["skills"])
 app.include_router(characters.router, prefix="/api/characters", tags=["characters"])

@@ -52,7 +52,7 @@ class TokenData(BaseModel):
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    """Register a new user."""
+    """Register a new user. Only PLAYER and VIEWER roles allowed for self-registration."""
     # Check if username already exists
     db_user = db.query(User).filter(User.username == user_data.username).first()
     if db_user:
@@ -67,6 +67,14 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
+        )
+    
+    # Restrict self-registration to PLAYER or VIEWER roles only
+    # ADMIN and DESIGNER roles must be assigned by an existing admin
+    if user_data.role not in [UserRole.PLAYER, UserRole.VIEWER]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only PLAYER and VIEWER roles can be self-assigned. Contact an admin for elevated roles."
         )
     
     # Create new user

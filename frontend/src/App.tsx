@@ -13,6 +13,7 @@ import CharactersDesigner from './pages/designer/CharactersDesigner';
 import WearablesDesigner from './pages/designer/WearablesDesigner';
 import WeaponsDesigner from './pages/designer/WeaponsDesigner';
 import ConsumablesDesigner from './pages/designer/ConsumablesDesigner';
+import UserManagement from './pages/admin/UserManagement';
 
 function App() {
   return (
@@ -40,6 +41,15 @@ function App() {
             <Route path="weapons/*" element={<WeaponsDesigner />} />
             <Route path="consumables/*" element={<ConsumablesDesigner />} />
           </Route>
+          
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <UserManagement />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
