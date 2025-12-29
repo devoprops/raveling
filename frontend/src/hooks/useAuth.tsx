@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../utils/api';
 
 interface User {
@@ -22,7 +21,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -39,6 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await apiClient.get('/api/auth/me');
       setUser(response.data);
     } catch (error) {
+      // Silently fail - user is not logged in or API is unavailable
+      console.debug('Failed to fetch user:', error);
       localStorage.removeItem('auth_token');
       setUser(null);
     } finally {
@@ -61,13 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('auth_token', access_token);
     
     await fetchUser();
-    navigate('/designer');
+    window.location.href = '/designer';
   };
 
   const logout = () => {
     localStorage.removeItem('auth_token');
     setUser(null);
-    navigate('/');
+    window.location.href = '/';
   };
 
   return (
