@@ -79,8 +79,14 @@ In your GitHub repository:
 
 In Railway Dashboard → Service → Variables:
 - `DATABASE_URL` - Railway will provide this if you add a database
-- `SECRET_KEY` - Generate a secure random string
+- `SECRET_KEY` - Generate a secure random string (e.g., use a long random string)
+- `ACCESS_TOKEN_EXPIRE_MINUTES` - `500` (number, not a string)
+- `ALGORITHM` - `HS256`
 - `CORS_ORIGINS` - `https://raveling.devocosm.com,http://localhost:3000`
+- `GITHUB_TOKEN` - Your GitHub personal access token (REQUIRED)
+- `GITHUB_REPO` - `devoprops/raveling` (or your repo in `owner/repo` format)
+- `GITHUB_BRANCH` - `main`
+- `GITHUB_BASE_PATH` - `src/configs`
 
 ## Step 3: First Deployment
 

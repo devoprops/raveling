@@ -4,16 +4,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-# Find .env file relative to this file's location
+# Load environment variables from .env file (for local development only)
+# Railway and other platforms inject env vars directly, so .env is optional
 env_path = Path(__file__).parent.parent / '.env'
-load_dotenv(dotenv_path=env_path)
-
-# Debug: Check if token is loaded (remove after testing)
-print(f"GITHUB_TOKEN loaded: {bool(os.getenv('GITHUB_TOKEN'))}")
-print(f"GITHUB_REPO: {os.getenv('GITHUB_REPO')}")
-print(f"Looking for .env at: {env_path}")
-print(f".env file exists: {env_path.exists()}")
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print(f"Loaded .env file from: {env_path}")
+else:
+    print("No .env file found - using environment variables directly (production mode)")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
