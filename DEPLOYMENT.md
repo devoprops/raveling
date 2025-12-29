@@ -165,6 +165,40 @@ Railway will automatically deploy when you push to `main` branch (if GitHub inte
 - Check backend logs for CORS errors
 - Ensure frontend `VITE_API_URL` points to correct backend URL
 
+### Blank Screen / React Router Not Working
+
+**Symptoms:**
+- Page loads but shows blank/black screen
+- Direct URLs (e.g., `/designer`, `/about`) return 404
+- Browser console shows no JavaScript errors
+
+**Solution:**
+- Ensure `wrangler.toml` has `not_found_handling = "single-page-application"` in the `[assets]` section
+- This tells Cloudflare to serve `index.html` for all routes so React Router can handle client-side routing
+- After updating `wrangler.toml`, push changes and redeploy
+
+**Verification:**
+- Visit `https://raveling.devocosm.com` - should show login page
+- Visit `https://raveling.devocosm.com/about` - should show about page (not 404)
+- Check browser console for any JavaScript errors
+
+### Domain API Errors
+
+**Symptoms:**
+- Cloudflare dashboard shows: `API Request Failed: GET /api/v4/accounts/.../workers/domains/records`
+- Deployment succeeds but domain errors appear
+
+**Explanation:**
+- These are usually harmless API warnings from Cloudflare trying to fetch domain records
+- They don't affect functionality if the site is working
+- May occur if custom domain isn't fully configured or API permissions are limited
+
+**Solution:**
+- Verify custom domain is added in Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Domains
+- If domain is missing, add `raveling.devocosm.com` there (Cloudflare will auto-configure DNS)
+- Check DNS records in Cloudflare Dashboard → DNS → Records for `devocosm.com`
+- Ensure CNAME record exists: `raveling` → Your Workers deployment URL
+
 ## Manual Deployment
 
 If you need to deploy manually:
