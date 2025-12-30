@@ -13,11 +13,16 @@ from src.database.models import User, UserRole
 
 # Password hashing
 # Use bcrypt with explicit configuration to avoid version check issues
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__ident="2b",  # Use bcrypt 2b identifier (compatible with bcrypt 4.x)
-)
+# Passlib has issues detecting bcrypt 4.x version, so we configure it explicitly
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    pwd_context = CryptContext(
+        schemes=["bcrypt"],
+        deprecated="auto",
+        bcrypt__ident="2b",  # Use bcrypt 2b identifier (compatible with bcrypt 4.x)
+        bcrypt__rounds=12,  # Explicit rounds to avoid detection issues
+    )
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
@@ -56,12 +61,28 @@ def get_password_hash(password: str) -> str:
         error_msg = str(e)
         # Check if it's the 72-byte error (which shouldn't happen for short passwords)
         if "72" in error_msg or "longer" in error_msg.lower():
-            # This suggests bcrypt 5.0.0 is still being used
-            raise ValueError(
-                f"Password hashing failed. This may indicate bcrypt 5.0.0 is installed instead of 4.x. "
-                f"Error: {error_msg}. Password length: {original_length} bytes ({len(password)} chars). "
-                f"Please ensure bcrypt<5.0.0 is installed."
-            )
+            # Passlib might be having issues with bcrypt. Try using bcrypt directly as fallback
+            try:
+                import bcrypt
+                # Use bcrypt directly - encode password to bytes
+                password_bytes = password.encode('utf-8')
+                if len(password_bytes) > 72:
+                    password_bytes = password_bytes[:72]
+                salt = bcrypt.gensalt(rounds=12)
+                hashed = bcrypt.hashpw(password_bytes, salt)
+                # Return as string (bcrypt returns bytes)
+                return hashed.decode('utf-8')
+            except ImportError:
+                raise ValueError(
+                    f"Password hashing failed and bcrypt module not available. "
+                    f"Error: {error_msg}. Password length: {original_length} bytes ({len(password)} chars)."
+                )
+            except Exception as bcrypt_error:
+                raise ValueError(
+                    f"Password hashing failed with both passlib and direct bcrypt. "
+                    f"Passlib error: {error_msg}. Bcrypt error: {bcrypt_error}. "
+                    f"Password length: {original_length} bytes ({len(password)} chars)."
+                )
         # If there's still an error, provide more context
         raise ValueError(f"Failed to hash password: {error_msg}. Password length: {original_length} bytes")
 
