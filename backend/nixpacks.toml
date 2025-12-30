@@ -7,6 +7,9 @@ cmds = [
   "export PATH=\"$HOME/.local/bin:$PATH\"",
   "# Sync dependencies (without --frozen to respect pyproject.toml constraints)",
   "uv sync",
+  "# Force uninstall bcrypt 5.0.0 if present and install 4.x",
+  "uv pip uninstall -y bcrypt 2>/dev/null || true",
+  "uv pip install 'bcrypt>=4.0.0,<5.0.0'",
   "# Verify bcrypt version is correct",
   "uv pip show bcrypt | grep Version || echo 'bcrypt not found'"
 ]
