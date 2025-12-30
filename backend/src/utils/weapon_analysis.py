@@ -106,8 +106,8 @@ def _sample_damage(dist_type: str, params: Dict[str, Any]) -> float:
         Sampled damage value
     """
     if dist_type == "uniform":
-        min_val = params.get("min_val", 0.0)
-        max_val = params.get("max_val", 1.0)
+        min_val = params.get("min_val", params.get("min", 0.0))
+        max_val = params.get("max_val", params.get("max", 1.0))
         return sample_uniform(min_val, max_val)
     
     elif dist_type == "gaussian":
