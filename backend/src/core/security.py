@@ -3,26 +3,13 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from src.database.database import get_db
 from src.database.models import User, UserRole
-
-# Password hashing
-# Use bcrypt with explicit configuration to avoid version check issues
-# Passlib has issues detecting bcrypt 4.x version, so we configure it explicitly
-import warnings
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    pwd_context = CryptContext(
-        schemes=["bcrypt"],
-        deprecated="auto",
-        bcrypt__ident="2b",  # Use bcrypt 2b identifier (compatible with bcrypt 4.x)
-        bcrypt__rounds=12,  # Explicit rounds to avoid detection issues
-    )
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
@@ -35,70 +22,33 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hash. Supports both passlib and direct bcrypt hashes."""
+    """Verify a password against a bcrypt hash."""
     try:
-        # Try passlib first (works for passlib-generated hashes)
-        return pwd_context.verify(plain_password, hashed_password)
-    except (ValueError, TypeError, AttributeError):
-        # If passlib fails, try direct bcrypt verification (for direct bcrypt hashes)
-        try:
-            import bcrypt
-            password_bytes = plain_password.encode('utf-8')
-            if len(password_bytes) > 72:
-                password_bytes = password_bytes[:72]
-            hash_bytes = hashed_password.encode('utf-8')
-            return bcrypt.checkpw(password_bytes, hash_bytes)
-        except (ImportError, ValueError, TypeError):
-            # If both fail, return False
-            return False
+        password_bytes = plain_password.encode('utf-8')
+        # Bcrypt has a 72-byte limit
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+        hash_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hash_bytes)
+    except (ValueError, TypeError, Exception):
+        # If verification fails for any reason, return False
+        return False
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password. Bcrypt has a 72-byte limit, so we truncate if necessary."""
-    # Bcrypt has a 72-byte limit, encode to bytes and truncate if needed
+    """Hash a password using bcrypt. Bcrypt has a 72-byte limit, so we truncate if necessary."""
     password_bytes = password.encode('utf-8')
-    original_length = len(password_bytes)
     
+    # Bcrypt has a 72-byte limit - truncate if necessary
     if len(password_bytes) > 72:
         password_bytes = password_bytes[:72]
-        # Try to decode back, but if it's in the middle of a multi-byte character, 
-        # we'll get a valid string up to that point
-        try:
-            password = password_bytes.decode('utf-8')
-        except UnicodeDecodeError:
-            # If we're in the middle of a multi-byte character, decode with error handling
-            password = password_bytes.decode('utf-8', errors='ignore')
     
-    try:
-        return pwd_context.hash(password)
-    except (ValueError, TypeError) as e:
-        error_msg = str(e)
-        # Check if it's the 72-byte error (which shouldn't happen for short passwords)
-        if "72" in error_msg or "longer" in error_msg.lower():
-            # Passlib might be having issues with bcrypt. Try using bcrypt directly as fallback
-            try:
-                import bcrypt
-                # Use bcrypt directly - encode password to bytes
-                password_bytes = password.encode('utf-8')
-                if len(password_bytes) > 72:
-                    password_bytes = password_bytes[:72]
-                salt = bcrypt.gensalt(rounds=12)
-                hashed = bcrypt.hashpw(password_bytes, salt)
-                # Return as string (bcrypt returns bytes)
-                return hashed.decode('utf-8')
-            except ImportError:
-                raise ValueError(
-                    f"Password hashing failed and bcrypt module not available. "
-                    f"Error: {error_msg}. Password length: {original_length} bytes ({len(password)} chars)."
-                )
-            except Exception as bcrypt_error:
-                raise ValueError(
-                    f"Password hashing failed with both passlib and direct bcrypt. "
-                    f"Passlib error: {error_msg}. Bcrypt error: {bcrypt_error}. "
-                    f"Password length: {original_length} bytes ({len(password)} chars)."
-                )
-        # If there's still an error, provide more context
-        raise ValueError(f"Failed to hash password: {error_msg}. Password length: {original_length} bytes")
+    # Generate salt and hash password
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    
+    # Return as string (bcrypt returns bytes)
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
