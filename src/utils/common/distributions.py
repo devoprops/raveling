@@ -154,3 +154,52 @@ def calculate_dice_probabilities(num_dice: int, num_sides: int) -> Dict[int, flo
 # Type alias for distribution functions
 DistributionFunction = Callable[[], Union[float, int]]
 
+
+def create_distribution_function(distribution_params: Dict[str, Any]) -> DistributionFunction:
+    """
+    Create a distribution function from parameters dictionary.
+    
+    Args:
+        distribution_params: Dictionary with 'type' and 'params' keys
+            Example: {"type": "gaussian", "params": {"mean": 10.0, "std_dev": 2.0}}
+    
+    Returns:
+        Distribution function that can be called to sample values
+    """
+    dist_type = distribution_params.get("type", "gaussian")
+    params = distribution_params.get("params", {})
+    
+    if dist_type == "uniform":
+        min_val = params.get("min", 0.0)
+        max_val = params.get("max", 10.0)
+        return lambda: sample_uniform(min_val, max_val)
+    
+    elif dist_type == "gaussian":
+        mean = params.get("mean", 0.0)
+        std_dev = params.get("std_dev", 1.0)
+        return lambda: sample_gaussian(mean, std_dev)
+    
+    elif dist_type == "skewnorm":
+        mean = params.get("mean", 0.0)
+        std_dev = params.get("std_dev", 1.0)
+        skew = params.get("skew", 0.0)
+        return lambda: sample_skewnorm(mean, std_dev, skew)
+    
+    elif dist_type == "bimodal":
+        mean1 = params.get("mean1", 0.0)
+        std1 = params.get("std1", 1.0)
+        mean2 = params.get("mean2", 10.0)
+        std2 = params.get("std2", 1.0)
+        weight = params.get("weight", 0.5)
+        return lambda: sample_bimodal(mean1, std1, mean2, std2, weight)
+    
+    elif dist_type == "die_roll":
+        notation = params.get("notation", "1d6")
+        return lambda: sample_die_roll(notation)
+    
+    else:
+        # Default to gaussian
+        mean = params.get("mean", 0.0)
+        std_dev = params.get("std_dev", 1.0)
+        return lambda: sample_gaussian(mean, std_dev)
+

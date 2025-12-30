@@ -1,0 +1,95 @@
+.effector-list {
+  margin-top: 16px;
+}
+
+.effector-list.empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  border: 1px dashed #444;
+  border-radius: 8px;
+  background: #1a1a1a;
+}
+
+.effector-list h3 {
+  margin: 0 0 12px 0;
+  color: #d4af37;
+  font-size: 1.1em;
+}
+
+.effector-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effector-list-item {
+  padding: 12px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+}
+
+.effector-list-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.effector-list-item-header .effector-name {
+  flex: 1;
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.effector-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-button,
+.remove-button {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  border-color: #d4af37;
+  background: #3a2a1a;
+}
+
+.remove-button:hover {
+  border-color: #8a4444;
+  background: #4a1a1a;
+}
+
+.effector-list-item-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.effector-type-badge {
+  padding: 2px 8px;
+  background: #444;
+  border-radius: 4px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.detail-tag {
+  padding: 2px 6px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  font-size: 0.85em;
+  color: #aaa;
+}
+
