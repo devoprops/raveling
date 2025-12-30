@@ -6,7 +6,10 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # Get database URL from environment, default to SQLite for local dev
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./raveling.db")
+# Handle empty strings - if DATABASE_URL is empty, use SQLite default
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./raveling.db"
 
 # For PostgreSQL on Railway, DATABASE_URL will be provided
 # Format: postgresql://user:password@host:port/database

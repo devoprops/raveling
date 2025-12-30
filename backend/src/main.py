@@ -16,6 +16,16 @@ else:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import auth, items, skills, characters, approval, users
+
+# Initialize database tables on startup
+try:
+    from src.database.init_db import init_db
+    init_db()
+    print("✅ Database tables initialized")
+except Exception as e:
+    print(f"⚠️  Database initialization warning: {e}")
+    # Don't crash - tables might already exist or connection might not be ready yet
+
 app = FastAPI(
     title="Raveling MUD API",
     description="Backend API for Raveling MUD Designer and Game",
