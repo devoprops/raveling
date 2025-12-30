@@ -1,7 +1,7 @@
 """Probability distribution utility functions for damage models and statistical calculations."""
 
 import random
-from typing import Callable, Union, Dict
+from typing import Callable, Union, Dict, Any
 from collections import defaultdict
 
 
