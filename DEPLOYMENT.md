@@ -26,9 +26,16 @@ If you've already connected Cloudflare Workers to your GitHub repository directl
    - Add custom domain: `raveling.devocosm.com`
    - Cloudflare will automatically configure DNS
 
-3. **Set Environment Variables** (if needed):
-   - In Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Variables
-   - Add `VITE_API_URL` = Your Railway backend URL (e.g., `https://your-backend.railway.app`)
+3. **Set Build Environment Variable** (REQUIRED):
+   - **Important**: For static assets, environment variables must be set at BUILD TIME, not runtime
+   - In Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Builds & Deployments
+   - Under "Build environment variables", add:
+     - Key: `VITE_API_URL`
+     - Value: Your Railway backend URL (e.g., `https://your-backend.railway.app`)
+   - **OR** update the build command to include it:
+     ```
+     cd frontend && VITE_API_URL=https://your-backend.railway.app npm install && npm run build
+     ```
 
 ### Option B: GitHub Actions Deployment (Alternative)
 
@@ -159,11 +166,35 @@ Railway will automatically deploy when you push to `main` branch (if GitHub inte
 - Ensure `backend/pyproject.toml` exists
 - Check that `railway.json` is correct
 
-### CORS Errors
+### CORS Errors / API Connection Issues
 
-- Verify `CORS_ORIGINS` includes `https://raveling.devocosm.com`
-- Check backend logs for CORS errors
-- Ensure frontend `VITE_API_URL` points to correct backend URL
+**Symptoms:**
+- Browser console shows: `Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://localhost:8000/api/...`
+- Login fails with "Login failed. Please check your credentials."
+- Network tab shows requests going to `localhost:8000` instead of Railway backend
+
+**Solution:**
+- **This means `VITE_API_URL` is not set in the Cloudflare build**
+- For static assets, environment variables must be set at BUILD TIME
+- Go to Cloudflare Dashboard → Workers & Pages → Your Project → Settings → Builds & Deployments
+- Under "Build environment variables", add:
+  - Key: `VITE_API_URL`
+  - Value: Your Railway backend URL (e.g., `https://your-backend.railway.app`)
+- **OR** update the build command in Cloudflare to:
+  ```
+  cd frontend && VITE_API_URL=https://your-backend.railway.app npm install && npm run build
+  ```
+- After setting this, trigger a new deployment (push to main or manually redeploy)
+
+**To find your Railway backend URL:**
+- Go to Railway Dashboard → Your Backend Service → Settings → Domains
+- Copy the Railway-provided domain (e.g., `your-service.railway.app`)
+- Or check the "Deployments" tab → Latest deployment → View logs → Look for the URL
+
+**Verify:**
+- Check browser console → Network tab → Look at API requests
+- They should go to your Railway URL, not `localhost:8000`
+- Verify `CORS_ORIGINS` in Railway includes `https://raveling.devocosm.com`
 
 ### Blank Screen / React Router Not Working
 
