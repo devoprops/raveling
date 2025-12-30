@@ -35,8 +35,35 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password."""
-    return pwd_context.hash(password)
+    """Hash a password. Bcrypt has a 72-byte limit, so we truncate if necessary."""
+    # Bcrypt has a 72-byte limit, encode to bytes and truncate if needed
+    password_bytes = password.encode('utf-8')
+    original_length = len(password_bytes)
+    
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+        # Try to decode back, but if it's in the middle of a multi-byte character, 
+        # we'll get a valid string up to that point
+        try:
+            password = password_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            # If we're in the middle of a multi-byte character, decode with error handling
+            password = password_bytes.decode('utf-8', errors='ignore')
+    
+    try:
+        return pwd_context.hash(password)
+    except (ValueError, TypeError) as e:
+        error_msg = str(e)
+        # Check if it's the 72-byte error (which shouldn't happen for short passwords)
+        if "72" in error_msg or "longer" in error_msg.lower():
+            # This suggests bcrypt 5.0.0 is still being used
+            raise ValueError(
+                f"Password hashing failed. This may indicate bcrypt 5.0.0 is installed instead of 4.x. "
+                f"Error: {error_msg}. Password length: {original_length} bytes ({len(password)} chars). "
+                f"Please ensure bcrypt<5.0.0 is installed."
+            )
+        # If there's still an error, provide more context
+        raise ValueError(f"Failed to hash password: {error_msg}. Password length: {original_length} bytes")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

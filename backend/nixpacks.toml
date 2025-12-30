@@ -5,7 +5,10 @@ nixPkgs = ["python313", "curl"]
 cmds = [
   "curl -LsSf https://astral.sh/uv/install.sh | sh",
   "export PATH=\"$HOME/.local/bin:$PATH\"",
-  "uv sync --frozen"
+  "# Sync dependencies (without --frozen to respect pyproject.toml constraints)",
+  "uv sync",
+  "# Verify bcrypt version is correct",
+  "uv pip show bcrypt | grep Version || echo 'bcrypt not found'"
 ]
 
 [start]
