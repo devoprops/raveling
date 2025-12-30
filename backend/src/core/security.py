@@ -35,8 +35,22 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a password against a hash. Supports both passlib and direct bcrypt hashes."""
+    try:
+        # Try passlib first (works for passlib-generated hashes)
+        return pwd_context.verify(plain_password, hashed_password)
+    except (ValueError, TypeError, AttributeError):
+        # If passlib fails, try direct bcrypt verification (for direct bcrypt hashes)
+        try:
+            import bcrypt
+            password_bytes = plain_password.encode('utf-8')
+            if len(password_bytes) > 72:
+                password_bytes = password_bytes[:72]
+            hash_bytes = hashed_password.encode('utf-8')
+            return bcrypt.checkpw(password_bytes, hash_bytes)
+        except (ImportError, ValueError, TypeError):
+            # If both fail, return False
+            return False
 
 
 def get_password_hash(password: str) -> str:
