@@ -140,3 +140,71 @@ async def logout():
     # JWT tokens are stateless, so logout is handled client-side
     # by discarding the token
     return {"message": "Successfully logged out"}
+
+
+@router.post("/create-admin")
+async def create_admin_endpoint(
+    username: str,
+    email: str,
+    password: str,
+    secret_token: str,
+    db: Session = Depends(get_db)
+):
+    """
+    One-time admin creation endpoint.
+    Protected by SECRET_KEY - use your Railway SECRET_KEY as the secret_token.
+    This endpoint should be removed or disabled after creating the first admin.
+    """
+    import os
+    
+    # Verify secret token matches SECRET_KEY
+    expected_secret = os.getenv("SECRET_KEY")
+    if not expected_secret or secret_token != expected_secret:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid secret token"
+        )
+    
+    # Check if admin already exists
+    existing_admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+    if existing_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An admin user already exists. Use the admin panel to create additional admins."
+        )
+    
+    # Check if username already exists
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists"
+        )
+    
+    # Check if email already exists
+    existing_email = db.query(User).filter(User.email == email).first()
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists"
+        )
+    
+    # Create admin user
+    admin = User(
+        username=username,
+        email=email,
+        hashed_password=get_password_hash(password),
+        role=UserRole.ADMIN,
+        is_active=True
+    )
+    
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    
+    return {
+        "message": "Admin user created successfully",
+        "username": admin.username,
+        "email": admin.email,
+        "role": admin.role.value
+    }
