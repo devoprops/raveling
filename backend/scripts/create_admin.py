@@ -8,20 +8,47 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.database.database import SessionLocal, init_db
+from src.database.database import SessionLocal
+from src.database.init_db import init_db
 from src.database.models import User, UserRole
 from src.core.security import get_password_hash
 
 
-def create_admin(username: str, email: str, password: str):
+def delete_user(username: str):
+    """Delete a user by username."""
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == username).first()
+        if user:
+            db.delete(user)
+            db.commit()
+            print(f"✅ Deleted user '{username}'")
+            return True
+        else:
+            print(f"⚠️  User '{username}' not found")
+            return False
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error deleting user: {e}")
+        return False
+    finally:
+        db.close()
+
+
+def create_admin(username: str, email: str, password: str, delete_existing: bool = False):
     """Create an admin user."""
     db = SessionLocal()
     try:
         # Check if admin with this username exists
         existing_user = db.query(User).filter(User.username == username).first()
         if existing_user:
-            print(f"❌ User '{username}' already exists!")
-            return False
+            if delete_existing:
+                print(f"⚠️  User '{username}' already exists. Deleting...")
+                db.delete(existing_user)
+                db.commit()
+            else:
+                print(f"❌ User '{username}' already exists! Use --delete-existing to replace it.")
+                return False
         
         # Check if email is already taken
         existing_email = db.query(User).filter(User.email == email).first()
@@ -63,6 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("--email", required=True, help="Admin email")
     parser.add_argument("--password", required=True, help="Admin password")
     parser.add_argument("--init-db", action="store_true", help="Initialize database tables first")
+    parser.add_argument("--delete-existing", action="store_true", help="Delete existing user with same username first")
     
     args = parser.parse_args()
     
@@ -70,5 +98,5 @@ if __name__ == "__main__":
         print("Initializing database...")
         init_db()
     
-    create_admin(args.username, args.email, args.password)
+    create_admin(args.username, args.email, args.password, args.delete_existing)
 
