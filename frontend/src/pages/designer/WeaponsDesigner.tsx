@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { WeaponForm, YAMLPreview, AnalysisTools, WeaponFormData } from '../../components/weapons';
+import { useState, useRef } from 'react';
+import { WeaponForm, WeaponFormData } from '../../components/weapons';
+import PreviewTabs from '../../components/weapons/PreviewTabs';
 import './designer-page.css';
 import './weapons-designer.css';
 
@@ -27,15 +28,74 @@ export default function WeaponsDesigner() {
     restrictions: {},
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFormChange = (data: WeaponFormData) => {
     setWeaponConfig(data);
+  };
+
+  const handleSave = () => {
+    const dataStr = JSON.stringify(weaponConfig, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${weaponConfig.name || 'weapon'}_config.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoad = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const loadedConfig = JSON.parse(e.target?.result as string);
+        setWeaponConfig(loadedConfig);
+      } catch (error) {
+        alert('Failed to load config file. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
     <div className="designer-page">
       <div className="page-header">
-        <h1 className="page-title">⚔️ Weapons Designer</h1>
-        <p className="page-subtitle">Create and manage weapon configurations</p>
+        <div className="weapons-designer-header">
+          <div>
+            <h1 className="page-title">⚔️ Weapons Designer</h1>
+            <p className="page-subtitle">Create and manage weapon configurations</p>
+          </div>
+          <div className="weapon-actions">
+            <button onClick={handleSave} className="save-btn">
+              Save
+            </button>
+            <button onClick={handleLoad} className="load-btn">
+              Load
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileLoad}
+              style={{ display: 'none' }}
+            />
+          </div>
+        </div>
       </div>
       <div className="weapons-designer-content">
         <div className="weapons-designer-main">
@@ -43,8 +103,7 @@ export default function WeaponsDesigner() {
             <WeaponForm initialData={weaponConfig} onChange={handleFormChange} />
           </div>
           <div className="weapons-designer-preview-section">
-            <YAMLPreview weaponConfig={weaponConfig} />
-            <AnalysisTools weaponConfig={weaponConfig} />
+            <PreviewTabs weaponConfig={weaponConfig} />
           </div>
         </div>
       </div>

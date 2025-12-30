@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { EffectorConfig } from '../effectors/EffectorSelector';
-import EffectorSelector from '../effectors/EffectorSelector';
+import SimpleEffectorSelector from './SimpleEffectorSelector';
 import EffectorList from '../effectors/EffectorList';
 import ThumbnailPicker from './ThumbnailPicker';
 import './WeaponForm.css';
@@ -287,7 +287,7 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
 
       <div className="form-section">
         <h3 className="section-title">Effectors</h3>
-        <EffectorSelector onSelect={handleAddEffector} selectedEffectors={formData.effectors} />
+        <SimpleEffectorSelector onAdd={handleAddEffector} />
         <EffectorList effectors={formData.effectors} onRemove={handleRemoveEffector} />
       </div>
     </div>

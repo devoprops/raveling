@@ -10,7 +10,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
 } from 'recharts';
 import apiClient from '../../utils/api';
 import './AnalysisTools.css';
@@ -23,8 +22,31 @@ interface AnalysisData {
   strikes: number[];
   cumulative_damage: number[];
   damage_values: number[];
+  damage_per_strike: number[];
+  effector_breakdown: Record<string, number[]>;
+  effector_cumulative: Record<string, number[]>;
   min_damage: number;
   max_damage: number;
+}
+
+// Color mapping for effectors
+const ELEMENT_COLORS: Record<string, string> = {
+  Earth: '#8B4513', // Brown
+  Water: '#1E90FF', // Blue
+  Air: '#87CEEB',   // Sky blue
+  Fire: '#FF4500',  // Orange red
+};
+
+const DAMAGE_COLOR = '#808080'; // Grey for physical damage
+
+function getEffectorColor(effector: any): string {
+  if (effector.effector_type === 'damage') {
+    if (effector.damage_subtype === 'elemental' && effector.element_type) {
+      return ELEMENT_COLORS[effector.element_type] || '#e94560';
+    }
+    return DAMAGE_COLOR;
+  }
+  return '#e94560'; // Default color
 }
 
 export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
@@ -57,13 +79,47 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
     }
   };
 
-  // Prepare data for charts
-  const damageOverStrikesData = analysisData
-    ? analysisData.strikes.map((strike, index) => ({
+  // Prepare cumulative data with per-effector breakdown
+  const cumulativeData = useMemo(() => {
+    if (!analysisData) return [];
+
+    const data = analysisData.strikes.map((strike, index) => {
+      const point: any = {
         strike,
-        damage: analysisData.cumulative_damage[index],
-      }))
-    : [];
+        Overall: analysisData.cumulative_damage[index],
+      };
+
+      // Add per-effector cumulative damage
+      Object.keys(analysisData.effector_cumulative).forEach((effectorId) => {
+        point[effectorId] = analysisData.effector_cumulative[effectorId][index];
+      });
+
+      return point;
+    });
+
+    return data;
+  }, [analysisData]);
+
+  // Prepare damage vs call data with per-effector breakdown
+  const damageVsCallData = useMemo(() => {
+    if (!analysisData) return [];
+
+    const data = analysisData.strikes.map((strike, index) => {
+      const point: any = {
+        strike,
+        Overall: analysisData.damage_per_strike[index],
+      };
+
+      // Add per-effector damage per strike
+      Object.keys(analysisData.effector_breakdown).forEach((effectorId) => {
+        point[effectorId] = analysisData.effector_breakdown[effectorId][index];
+      });
+
+      return point;
+    });
+
+    return data;
+  }, [analysisData]);
 
   // Prepare distribution data (bin damage values)
   const distributionData = useMemo(() => {
@@ -94,6 +150,18 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
       count,
     }));
   }, [analysisData]);
+
+  // Get effector info for legend
+  const effectorInfo = useMemo(() => {
+    if (!weaponConfig.effectors) return [];
+    return weaponConfig.effectors.map((effector: any, idx: number) => ({
+      id: effector.effector_name || `effector_${idx}`,
+      name: effector.effector_name || `Effector ${idx + 1}`,
+      color: getEffectorColor(effector),
+      type: effector.effector_type,
+      element: effector.element_type,
+    }));
+  }, [weaponConfig.effectors]);
 
   return (
     <div className="analysis-tools">
@@ -136,10 +204,11 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
             </div>
           </div>
 
+          {/* Cumulative Damage Chart */}
           <div className="chart-container">
             <h4 className="chart-title">Cumulative Damage Over Strikes</h4>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={damageOverStrikesData}>
+              <LineChart data={cumulativeData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(233, 69, 96, 0.2)" />
                 <XAxis
                   dataKey="strike"
@@ -155,30 +224,73 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                   }}
                 />
                 <Legend />
-                <ReferenceLine
-                  y={analysisData.min_damage}
-                  label={{ value: `Min: ${analysisData.min_damage.toFixed(2)}`, position: 'top' }}
-                  stroke="#e94560"
-                  strokeDasharray="3 3"
-                />
-                <ReferenceLine
-                  y={analysisData.max_damage}
-                  label={{ value: `Max: ${analysisData.max_damage.toFixed(2)}`, position: 'top' }}
-                  stroke="#e94560"
-                  strokeDasharray="3 3"
-                />
                 <Line
                   type="monotone"
-                  dataKey="damage"
+                  dataKey="Overall"
                   stroke="#e94560"
                   strokeWidth={2}
                   dot={false}
-                  name="Cumulative Damage"
+                  name="Overall"
                 />
+                {effectorInfo.map((effector) => (
+                  <Line
+                    key={effector.id}
+                    type="monotone"
+                    dataKey={effector.id}
+                    stroke={effector.color}
+                    strokeWidth={2}
+                    dot={false}
+                    name={effector.name}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
 
+          {/* Damage vs Call Chart */}
+          <div className="chart-container">
+            <h4 className="chart-title">Damage vs Call (Per Strike)</h4>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={damageVsCallData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(233, 69, 96, 0.2)" />
+                <XAxis
+                  dataKey="strike"
+                  stroke="#c4c4c4"
+                  style={{ fontSize: '0.85rem' }}
+                />
+                <YAxis stroke="#c4c4c4" style={{ fontSize: '0.85rem' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: '1px solid rgba(233, 69, 96, 0.3)',
+                    color: '#c4c4c4',
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="Overall"
+                  stroke="#e94560"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Overall"
+                />
+                {effectorInfo.map((effector) => (
+                  <Line
+                    key={effector.id}
+                    type="monotone"
+                    dataKey={effector.id}
+                    stroke={effector.color}
+                    strokeWidth={2}
+                    dot={false}
+                    name={effector.name}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Distribution Chart */}
           <div className="chart-container">
             <h4 className="chart-title">Damage Distribution</h4>
             <ResponsiveContainer width="100%" height={300}>
@@ -210,4 +322,3 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
     </div>
   );
 }
-
