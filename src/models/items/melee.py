@@ -25,10 +25,13 @@ class BladedWeapon(Weapon):
         width_cm: float,
         material: str,
         functional_nodes: List[FunctionalNode],
-        slots: Optional[Dict[str, FunctionalNode]] = None,
         blade_length: float,
         sharpness: float,
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a bladed weapon.
@@ -46,6 +49,10 @@ class BladedWeapon(Weapon):
             blade_length: Length of the blade
             sharpness: Sharpness rating
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
         """
         super().__init__(
             name=name,
@@ -58,6 +65,9 @@ class BladedWeapon(Weapon):
             functional_nodes=functional_nodes,
             slots=slots,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            thumbnail_path=thumbnail_path,
         )
         self.blade_length = blade_length
         self.sharpness = sharpness
@@ -105,10 +115,13 @@ class BluntWeapon(Weapon):
         width_cm: float,
         material: str,
         functional_nodes: List[FunctionalNode],
-        slots: Optional[Dict[str, FunctionalNode]] = None,
         impact_force: float,
         stun_chance: float = 0.0,
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a blunt weapon.
@@ -126,6 +139,10 @@ class BluntWeapon(Weapon):
             impact_force: Impact force rating
             stun_chance: Chance to stun target (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
         """
         super().__init__(
             name=name,
@@ -138,6 +155,9 @@ class BluntWeapon(Weapon):
             functional_nodes=functional_nodes,
             slots=slots,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            thumbnail_path=thumbnail_path,
         )
         self.impact_force = impact_force
         self.stun_chance = stun_chance
@@ -191,10 +211,13 @@ class FlailedWeapon(Weapon):
         width_cm: float,
         material: str,
         functional_nodes: List[FunctionalNode],
-        slots: Optional[Dict[str, FunctionalNode]] = None,
         chain_length: float,
         wrap_chance: float = 0.0,
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a flailed weapon.
@@ -212,6 +235,10 @@ class FlailedWeapon(Weapon):
             chain_length: Length of chain/flail
             wrap_chance: Chance to wrap around target (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
         """
         super().__init__(
             name=name,
@@ -224,6 +251,9 @@ class FlailedWeapon(Weapon):
             functional_nodes=functional_nodes,
             slots=slots,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            thumbnail_path=thumbnail_path,
         )
         self.chain_length = chain_length
         self.wrap_chance = wrap_chance

@@ -1,0 +1,127 @@
+.analysis-tools {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.analysis-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.analysis-title {
+  margin: 0;
+  color: #e94560;
+  font-size: 1.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.analysis-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analysis-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #c4c4c4;
+  font-size: 0.9rem;
+}
+
+.strikes-input {
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.9rem;
+  width: 100px;
+}
+
+.strikes-input:focus {
+  outline: none;
+  border-color: rgba(233, 69, 96, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.analyze-btn {
+  padding: 0.5rem 1.5rem;
+  background: rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(233, 69, 96, 0.4);
+  border-radius: 4px;
+  color: #e94560;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  background: rgba(233, 69, 96, 0.3);
+  border-color: rgba(233, 69, 96, 0.6);
+}
+
+.analyze-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.analysis-error {
+  color: #e94560;
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  background: rgba(233, 69, 96, 0.1);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.analysis-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.analysis-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  color: #c4c4c4;
+  font-size: 0.85rem;
+}
+
+.stat-value {
+  color: #e94560;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.chart-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.chart-title {
+  margin: 0 0 1rem 0;
+  color: #e94560;
+  font-size: 1.1rem;
+}
+

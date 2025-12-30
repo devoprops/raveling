@@ -35,6 +35,9 @@ class Wearable(Item):
         functional_nodes: Optional[List[FunctionalNode]] = None,
         slots: Optional[Dict[str, FunctionalNode]] = None,
         restrictions: Optional[Dict[str, Any]] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a wearable item.
@@ -51,9 +54,14 @@ class Wearable(Item):
             defense_bonus: Bonus to defense
             stat_boosts: Dictionary of stat name -> boost value
             skill_boosts: Dictionary of skill name -> boost value
-            functional_nodes: Optional list of FunctionalNode instances
-            slots: Optional dictionary of slot_name -> FunctionalNode (inactive nodes)
-            restrictions: Optional dictionary of restrictions
+        functional_nodes: Optional list of FunctionalNode instances
+        slots: Optional dictionary of slot_name -> FunctionalNode (inactive nodes)
+        restrictions: Optional dictionary of restrictions
+        affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                   Defaults to 1.0 for all.
+        detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                   Defaults to 1.0 for all.
+        thumbnail_path: Optional path to thumbnail/icon image
         """
         super().__init__(
             name=name,
@@ -65,6 +73,9 @@ class Wearable(Item):
             width_cm=width_cm,
             material=material,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            thumbnail_path=thumbnail_path,
         )
         
         if slot not in EQUIPMENT_SLOTS:

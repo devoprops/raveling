@@ -90,6 +90,52 @@ class GitHubStorage:
         except Exception as e:
             raise RuntimeError(f"Failed to save config to GitHub: {e}")
     
+    def save_file(
+        self,
+        file_path: str,
+        content: bytes,
+        commit_message: Optional[str] = None
+    ) -> str:
+        """
+        Save a binary file to GitHub.
+        
+        Args:
+            file_path: Path in repository (e.g., "thumbnails/items/sword.png")
+            content: File content as bytes
+            commit_message: Optional commit message
+            
+        Returns:
+            Commit SHA
+        """
+        if not self.repo:
+            raise RuntimeError("GitHub storage not initialized")
+        
+        try:
+            # Try to get existing file
+            try:
+                existing_file = self.repo.get_contents(file_path, ref=GITHUB_BRANCH)
+                # Update existing file
+                commit = self.repo.update_file(
+                    path=file_path,
+                    message=commit_message or f"Update file: {file_path}",
+                    content=content,
+                    sha=existing_file.sha,
+                    branch=GITHUB_BRANCH
+                )
+            except GithubException:
+                # File doesn't exist, create it
+                commit = self.repo.create_file(
+                    path=file_path,
+                    message=commit_message or f"Create file: {file_path}",
+                    content=content,
+                    branch=GITHUB_BRANCH
+                )
+            
+            return commit["commit"].sha
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to save file to GitHub: {e}")
+    
     def load_config(self, config_type: str, name: str) -> Dict[str, Any]:
         """
         Load a config file from GitHub.

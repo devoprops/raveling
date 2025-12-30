@@ -2,8 +2,8 @@
 
 from typing import List, Dict, Any, Optional
 from src.models.items.base import Item
-from src.models.items.functional_node import FunctionalNode
-from src.utils.constants import ITEM_TYPE_WEAPON, FUNCTIONAL_NODE_CLASS_INNATE, FUNCTIONAL_NODE_CLASS_PRIMARY
+from src.models.effectors.base import Effector
+from src.utils.constants import ITEM_TYPE_WEAPON
 
 
 class Weapon(Item):
@@ -11,8 +11,8 @@ class Weapon(Item):
     Base class for all weapons.
     
     Attributes:
-        functional_nodes: List of FunctionalNode instances that define weapon effects
-        slots: Dictionary mapping slot names to FunctionalNode instances (inactive nodes)
+        effectors: List of Effector instances that define weapon effects
+        slots: Dictionary mapping slot names to Effector instances (inactive effectors)
     """
     
     def __init__(
@@ -24,9 +24,14 @@ class Weapon(Item):
         length_cm: float,
         width_cm: float,
         material: str,
-        functional_nodes: List[FunctionalNode],
-        slots: Optional[Dict[str, FunctionalNode]] = None,
+        effectors: List[Effector],
+        slots: Optional[Dict[str, Effector]] = None,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        auxiliary_slots: int = 0,
+        size_constraints: Optional[tuple] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a weapon.
@@ -39,9 +44,16 @@ class Weapon(Item):
             length_cm: Length of the weapon in centimeters
             width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            functional_nodes: List of FunctionalNode instances
-            slots: Optional dictionary of slot_name -> FunctionalNode (inactive nodes)
+            effectors: List of Effector instances
+            slots: Optional dictionary of slot_name -> Effector (inactive effectors)
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            auxiliary_slots: Number of auxiliary slots the item provides (default: 0)
+            size_constraints: Optional tuple/list [min, max] for character size requirements
+            thumbnail_path: Optional path to thumbnail/icon image
         """
         super().__init__(
             name=name,
@@ -53,42 +65,46 @@ class Weapon(Item):
             width_cm=width_cm,
             material=material,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            auxiliary_slots=auxiliary_slots,
+            size_constraints=size_constraints,
+            thumbnail_path=thumbnail_path,
         )
-        self.functional_nodes = functional_nodes or []
+        self.effectors = effectors or []
         self.slots = slots or {}
     
-    def get_active_nodes(self, context: Optional[Dict[str, Any]] = None) -> List[FunctionalNode]:
+    def get_active_effectors(self, context: Optional[Dict[str, Any]] = None) -> List[Effector]:
         """
-        Get all active functional nodes (including activated slots).
+        Get all active effectors (including activated slots).
         
         Args:
-            context: Optional context for determining node activity
+            context: Optional context for determining effector activity
             
         Returns:
-            List of active functional nodes
+            List of active effectors
         """
-        active_nodes = []
+        active_effectors = []
         
-        # Add nodes that are active
-        for node in self.functional_nodes:
-            if node.is_active(context):
-                active_nodes.append(node)
+        # Add all effectors (they're always active by default)
+        # In the future, we could add activation logic based on context
+        active_effectors.extend(self.effectors)
         
         # Add activated slots
         if context and "activated_slots" in context:
             for slot_name in context["activated_slots"]:
-                if slot_name in self.slots:
-                    active_nodes.append(self.slots[slot_name])
+                if slot_name in self.slots and self.slots[slot_name] is not None:
+                    active_effectors.append(self.slots[slot_name])
         
-        return active_nodes
+        return active_effectors
     
-    def fill_slot(self, slot_name: str, node: FunctionalNode) -> bool:
+    def fill_slot(self, slot_name: str, effector: Effector) -> bool:
         """
-        Fill a slot with a functional node.
+        Fill a slot with an effector.
         
         Args:
             slot_name: Name of the slot to fill
-            node: FunctionalNode to place in the slot
+            effector: Effector to place in the slot
             
         Returns:
             True if slot was filled, False if slot doesn't exist or is already filled
@@ -99,12 +115,12 @@ class Weapon(Item):
         if self.slots[slot_name] is not None:
             return False  # Slot already filled
         
-        self.slots[slot_name] = node
+        self.slots[slot_name] = effector
         return True
     
     def clear_slot(self, slot_name: str) -> bool:
         """
-        Clear a slot (remove the functional node).
+        Clear a slot (remove the effector).
         
         Args:
             slot_name: Name of the slot to clear
@@ -125,15 +141,15 @@ class Weapon(Item):
         self, character: Any, target: Any, context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Calculate all weapon effects for a turn based on functional nodes.
+        Calculate all weapon effects for a turn based on effectors.
         
-        Each functional node is evaluated independently based on its execution probability
-        and activity status. Effects can include damage, buffs, debuffs, etc.
+        Each effector is evaluated independently based on its execution probability.
+        Effects can include damage, buffs, debuffs, etc.
         
         Args:
             character: Character using the weapon
             target: Target character or object
-            context: Optional context for node activity (e.g., activated_slots)
+            context: Optional context for effector activity (e.g., activated_slots)
             
         Returns:
             Dictionary containing all effects that occurred, including:
@@ -151,19 +167,20 @@ class Weapon(Item):
         buffs = []
         debuffs = []
         
-        # Get active nodes
-        active_nodes = self.get_active_nodes(context)
+        # Get active effectors
+        active_effectors = self.get_active_effectors(context)
         
-        for node in active_nodes:
-            # Check if node executes based on probability
-            if random.random() < node.execution_probability:
-                effect_result = node.execute(character, target)
+        for effector in active_effectors:
+            # Check execution probability (default 1.0 if not specified)
+            execution_prob = getattr(effector, 'execution_probability', 1.0)
+            if random.random() < execution_prob:
+                effect_result = effector.execute(character, target)
                 effects.append(effect_result)
                 
                 # Categorize effects
-                node_type = effect_result.get("node_type", "unknown")
+                effector_type = effect_result.get("effector_type", "unknown")
                 
-                if node_type == "damage":
+                if effector_type == "damage":
                     # Accumulate damage
                     if "amount" in effect_result:
                         damage_amount = effect_result["amount"]
@@ -182,10 +199,10 @@ class Weapon(Item):
                                 damage_breakdown[element_key] = 0.0
                             damage_breakdown[element_key] += damage_amount
                 
-                elif node_type == "buff":
+                elif effector_type == "buff":
                     buffs.append(effect_result)
                 
-                elif node_type == "debuff":
+                elif effector_type == "debuff":
                     debuffs.append(effect_result)
         
         return {
@@ -221,39 +238,39 @@ class Weapon(Item):
         
         Args:
             character: Character using the weapon
-            context: Optional context for node activity
+            context: Optional context for effector activity
             
         Returns:
             Dictionary with expected damage information:
-            - nodes: List of node information
-            - expected_damage_per_node: Expected damage contribution per node
+            - effectors: List of effector information
+            - expected_damage_per_effector: Expected damage contribution per effector
             - total_expected_damage: Sum of expected damage
         """
-        node_info = []
+        effector_info = []
         total_expected = 0.0
         
-        active_nodes = self.get_active_nodes(context)
+        active_effectors = self.get_active_effectors(context)
         
-        for node in active_nodes:
-            node_data = {
-                "node_type": node.node_type,
-                "node_class": node.node_class,
-                "execution_probability": node.execution_probability,
+        for effector in active_effectors:
+            effector_data = {
+                "effector_type": effector.effector_type,
+                "effector_name": effector.effector_name,
+                "execution_probability": getattr(effector, 'execution_probability', 1.0),
             }
             
-            # Add node-specific information
-            if hasattr(node, "element_type"):
-                node_data["element"] = node.element_type
-            if hasattr(node, "base_damage"):
+            # Add effector-specific information
+            if hasattr(effector, "element_type"):
+                effector_data["element"] = effector.element_type
+            if hasattr(effector, "base_damage"):
                 # Expected damage = base_damage * execution_probability
                 # (simplified - actual calculation would need distribution analysis)
-                expected = node.base_damage * node.execution_probability
-                node_data["expected_damage"] = expected
+                expected = effector.base_damage * effector_data["execution_probability"]
+                effector_data["expected_damage"] = expected
                 total_expected += expected
             
-            node_info.append(node_data)
+            effector_info.append(effector_data)
         
         return {
-            "nodes": node_info,
+            "effectors": effector_info,
             "total_expected_damage": total_expected,
         }

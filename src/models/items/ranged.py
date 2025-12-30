@@ -31,6 +31,9 @@ class Bow(Weapon):
         ammo_type: str,
         draw_strength: float,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a bow.
@@ -49,6 +52,10 @@ class Bow(Weapon):
             ammo_type: Type of ammunition required
             draw_strength: Draw strength required
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
         """
         super().__init__(
             name=name,
@@ -61,6 +68,8 @@ class Bow(Weapon):
             functional_nodes=functional_nodes,
             slots=slots,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
         )
         self.range = range
         self.ammo_type = ammo_type
@@ -137,10 +146,13 @@ class Throwable(Weapon):
         width_cm: float,
         material: str,
         functional_nodes: List[FunctionalNode],
-        slots: Optional[Dict[str, FunctionalNode]] = None,
         range: float,
         return_chance: float = 0.0,
+        slots: Optional[Dict[str, FunctionalNode]] = None,
         restrictions: Dict[str, Any] = None,
+        affinities: Optional[Dict[str, Dict[str, float]]] = None,
+        detriments: Optional[Dict[str, Dict[str, float]]] = None,
+        thumbnail_path: Optional[str] = None,
     ):
         """
         Initialize a throwable weapon.
@@ -158,6 +170,10 @@ class Throwable(Weapon):
             range: Maximum effective range
             return_chance: Chance weapon returns after throw (0.0 to 1.0)
             restrictions: Optional dictionary of restrictions
+            affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
+            detriments: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
+                       Defaults to 1.0 for all.
         """
         super().__init__(
             name=name,
@@ -170,6 +186,9 @@ class Throwable(Weapon):
             functional_nodes=functional_nodes,
             slots=slots,
             restrictions=restrictions,
+            affinities=affinities,
+            detriments=detriments,
+            thumbnail_path=thumbnail_path,
         )
         self.range = range
         self.return_chance = return_chance

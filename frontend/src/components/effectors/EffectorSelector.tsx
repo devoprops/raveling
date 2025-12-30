@@ -5,6 +5,7 @@ import './EffectorSelector.css';
 export interface EffectorConfig {
   effector_type: string;
   effector_name: string;
+  execution_probability?: number;
   damage_subtype?: string;
   element_type?: string;
   attribute_type?: string;

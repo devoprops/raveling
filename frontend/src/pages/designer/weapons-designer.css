@@ -1,0 +1,73 @@
+.weapons-designer-content {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(233, 69, 96, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.weapons-designer-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.weapons-designer-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.weapons-designer-form-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.weapons-designer-form-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.weapons-designer-form-section::-webkit-scrollbar-thumb {
+  background: rgba(233, 69, 96, 0.3);
+  border-radius: 4px;
+}
+
+.weapons-designer-form-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(233, 69, 96, 0.5);
+}
+
+.weapons-designer-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.weapons-designer-preview-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.weapons-designer-preview-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.weapons-designer-preview-section::-webkit-scrollbar-thumb {
+  background: rgba(233, 69, 96, 0.3);
+  border-radius: 4px;
+}
+
+.weapons-designer-preview-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(233, 69, 96, 0.5);
+}
+
+@media (max-width: 1200px) {
+  .weapons-designer-main {
+    grid-template-columns: 1fr;
+  }
+}
+
