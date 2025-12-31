@@ -20,7 +20,9 @@ class EffectStyleConfig(BaseModel):
     description: Optional[str] = ""
     process_verb: Optional[str] = ""
     execution_probability: float = 1.0
-    effector: Dict[str, Any]
+    effector: Optional[Dict[str, Any]] = None  # Single effector (backwards compat)
+    effectors: Optional[List[Dict[str, Any]]] = None  # Multiple effectors (new)
+    style_attributes: Optional[Dict[str, Any]] = None  # Type-specific attributes
 
 
 class EffectStyleResponse(BaseModel):
@@ -32,7 +34,8 @@ class EffectStyleResponse(BaseModel):
     description: Optional[str]
     process_verb: Optional[str]
     execution_probability: float
-    effector_config: Dict[str, Any]
+    effector_config: Dict[str, Any]  # Can be single effector or list
+    style_attributes: Optional[Dict[str, Any]] = None
     created_by_id: int
     created_at: str
     updated_at: Optional[str]
@@ -89,6 +92,7 @@ async def list_effect_styles(
             process_verb=style.process_verb,
             execution_probability=style.execution_probability,
             effector_config=style.effector_config,
+            style_attributes=style.style_attributes,
             created_by_id=style.created_by_id,
             created_at=style.created_at.isoformat() if style.created_at else "",
             updated_at=style.updated_at.isoformat() if style.updated_at else None,
@@ -126,6 +130,7 @@ async def get_effect_style(
         process_verb=style.process_verb,
         execution_probability=style.execution_probability,
         effector_config=style.effector_config,
+        style_attributes=style.style_attributes,
         created_by_id=style.created_by_id,
         created_at=style.created_at.isoformat() if style.created_at else "",
         updated_at=style.updated_at.isoformat() if style.updated_at else None,
@@ -163,6 +168,17 @@ async def create_effect_style(
             detail="execution_probability must be between 0.0 and 1.0"
         )
     
+    # Determine effector_config - support both single effector and multiple effectors
+    if style_config.effectors is not None:
+        effector_config = style_config.effectors
+    elif style_config.effector is not None:
+        effector_config = style_config.effector
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either 'effector' or 'effectors' must be provided"
+        )
+    
     # Create database record
     db_style = EffectStyle(
         name=style_config.name,
@@ -171,7 +187,8 @@ async def create_effect_style(
         description=style_config.description or "",
         process_verb=style_config.process_verb or style_config.subtype,
         execution_probability=style_config.execution_probability,
-        effector_config=style_config.effector,
+        effector_config=effector_config,
+        style_attributes=style_config.style_attributes,
         created_by_id=current_user.id,
     )
     
@@ -188,6 +205,7 @@ async def create_effect_style(
         process_verb=db_style.process_verb,
         execution_probability=db_style.execution_probability,
         effector_config=db_style.effector_config,
+        style_attributes=db_style.style_attributes,
         created_by_id=db_style.created_by_id,
         created_at=db_style.created_at.isoformat() if db_style.created_at else "",
         updated_at=db_style.updated_at.isoformat() if db_style.updated_at else None,
@@ -210,6 +228,15 @@ async def update_effect_style(
             detail=f"EffectStyle with id {style_id} not found"
         )
     
+    # Determine effector_config - support both single effector and multiple effectors
+    if style_config.effectors is not None:
+        effector_config = style_config.effectors
+    elif style_config.effector is not None:
+        effector_config = style_config.effector
+    else:
+        # Keep existing if neither provided
+        effector_config = db_style.effector_config
+    
     # Update fields
     db_style.name = style_config.name
     db_style.style_type = style_config.style_type
@@ -217,7 +244,9 @@ async def update_effect_style(
     db_style.description = style_config.description or ""
     db_style.process_verb = style_config.process_verb or style_config.subtype
     db_style.execution_probability = style_config.execution_probability
-    db_style.effector_config = style_config.effector
+    db_style.effector_config = effector_config
+    if style_config.style_attributes is not None:
+        db_style.style_attributes = style_config.style_attributes
     
     db.commit()
     db.refresh(db_style)
@@ -231,6 +260,7 @@ async def update_effect_style(
         process_verb=db_style.process_verb,
         execution_probability=db_style.execution_probability,
         effector_config=db_style.effector_config,
+        style_attributes=db_style.style_attributes,
         created_by_id=db_style.created_by_id,
         created_at=db_style.created_at.isoformat() if db_style.created_at else "",
         updated_at=db_style.updated_at.isoformat() if db_style.updated_at else None,

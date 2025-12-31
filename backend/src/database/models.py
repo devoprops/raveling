@@ -112,8 +112,14 @@ class EffectStyle(Base):
     process_verb = Column(String, nullable=True)
     execution_probability = Column(Float, default=1.0, nullable=False)
     
-    # Effector configuration stored as JSON
-    effector_config = Column(JSON, nullable=False)
+    # Effector configuration stored as JSON (now supports array of effectors)
+    effector_config = Column(JSON, nullable=False)  # Can be single effector or array
+    
+    # Type-specific attributes stored as JSON
+    # Physical: {range: int, area: int (default 1), cost: dict}
+    # Spell: {range: int, area: int (default 1), duration: str (default "1-call"), cost: dict}
+    # Buff/Debuff: {range: int, area: int, duration: str, affected_attributes: list[str], cost: dict}
+    style_attributes = Column(JSON, nullable=True)
     
     # Metadata
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)

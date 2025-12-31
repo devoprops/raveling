@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models and database
 from src.database.database import Base
-from src.database.models import User, Config  # Import all models
+from src.database.models import User, Config, EffectStyle, CollaborationNote, ApprovedConfig  # Import all models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

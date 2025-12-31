@@ -17,10 +17,22 @@ export interface EffectStyleConfig {
   description: string;
   process_verb: string;
   execution_probability: number;
-  effector: {
+  effector?: {
     effector_type: string;
     effector_name: string;
     [key: string]: any;
+  }; // Single effector (backwards compat)
+  effectors?: Array<{
+    effector_type: string;
+    effector_name: string;
+    [key: string]: any;
+  }>; // Multiple effectors (new)
+  style_attributes?: {
+    range?: number;
+    area?: number;
+    duration?: string;
+    cost?: Record<string, any>;
+    affected_attributes?: string[];
   };
 }
 
@@ -54,6 +66,14 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
     type: 'uniform',
     params: initialStyle?.effector?.distribution_parameters?.params || { min_val: 0, max_val: 10 },
   });
+
+  // Style attributes (type-specific)
+  const [range, setRange] = useState<number>(initialStyle?.style_attributes?.range ?? 1);
+  const [area, setArea] = useState<number>(initialStyle?.style_attributes?.area ?? 1);
+  const [duration, setDuration] = useState<string>(initialStyle?.style_attributes?.duration || '1-call');
+  const [cost, setCost] = useState<Record<string, any>>(initialStyle?.style_attributes?.cost || {});
+  const [affectedAttributes, setAffectedAttributes] = useState<string[]>(initialStyle?.style_attributes?.affected_attributes || []);
+  const [newAttribute, setNewAttribute] = useState<string>('');
 
   // Load pre-designed styles when style type changes
   useEffect(() => {
@@ -94,7 +114,10 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
     setProcessVerb(style.process_verb || style.subtype);
     setExecutionProbability(style.execution_probability);
     
-    const effector = style.effector_config || {};
+    // Handle effector_config - can be single effector or array
+    const effectorConfig = style.effector_config || {};
+    const effector = Array.isArray(effectorConfig) ? effectorConfig[0] || {} : effectorConfig;
+    
     setEffectorType(effector.effector_type || 'damage');
     setEffectorName(effector.effector_name || '');
     setDamageSubtype(effector.damage_subtype || 'physical');
@@ -107,6 +130,14 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
         params: effector.distribution_parameters.params || {},
       });
     }
+
+    // Load style attributes
+    const attrs = style.style_attributes || {};
+    setRange(attrs.range ?? 1);
+    setArea(attrs.area ?? 1);
+    setDuration(attrs.duration || '1-call');
+    setCost(attrs.cost || {});
+    setAffectedAttributes(attrs.affected_attributes || []);
   };
 
   const handleSave = async () => {
@@ -134,6 +165,26 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
       effectorConfig.distribution_parameters = distributionParams;
     }
 
+    // Build style attributes based on style type
+    const styleAttributes: any = {
+      range,
+      area,
+    };
+
+    // Add type-specific attributes
+    if (styleType === 'Spell' || styleType === 'Buff' || styleType === 'Debuff') {
+      styleAttributes.duration = duration;
+    }
+    
+    if (styleType === 'Buff' || styleType === 'Debuff') {
+      styleAttributes.affected_attributes = affectedAttributes;
+    }
+
+    // Add cost if provided
+    if (Object.keys(cost).length > 0) {
+      styleAttributes.cost = cost;
+    }
+
     const styleConfig: EffectStyleConfig = {
       name,
       style_type: styleType,
@@ -142,6 +193,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
       process_verb: processVerb || subtype,
       execution_probability: executionProbability,
       effector: effectorConfig,
+      style_attributes: styleAttributes,
     };
 
     // If pre-designed and we want to save to library
@@ -177,6 +229,23 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
       type: 'uniform',
       params: { min_val: 0, max_val: 10 },
     });
+    setRange(1);
+    setArea(1);
+    setDuration('1-call');
+    setCost({});
+    setAffectedAttributes([]);
+    setNewAttribute('');
+  };
+
+  const addAffectedAttribute = () => {
+    if (newAttribute.trim() && !affectedAttributes.includes(newAttribute.trim())) {
+      setAffectedAttributes([...affectedAttributes, newAttribute.trim()]);
+      setNewAttribute('');
+    }
+  };
+
+  const removeAffectedAttribute = (attr: string) => {
+    setAffectedAttributes(affectedAttributes.filter(a => a !== attr));
   };
 
   return (
@@ -411,6 +480,114 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
             )}
           </div>
 
+          <div className="form-section">
+            <h4>Style Attributes</h4>
+            <label>
+              Range:
+              <input
+                type="number"
+                min="1"
+                value={range}
+                onChange={(e) => setRange(parseInt(e.target.value) || 1)}
+              />
+            </label>
+            <label>
+              Area:
+              <input
+                type="number"
+                min="1"
+                value={area}
+                onChange={(e) => setArea(parseInt(e.target.value) || 1)}
+              />
+            </label>
+
+            {(styleType === 'Spell' || styleType === 'Buff' || styleType === 'Debuff') && (
+              <label>
+                Duration:
+                <input
+                  type="text"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="e.g., 1-call, 3-rounds, permanent"
+                />
+              </label>
+            )}
+
+            {(styleType === 'Buff' || styleType === 'Debuff') && (
+              <>
+                <label>
+                  Affected Attributes:
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <input
+                      type="text"
+                      value={newAttribute}
+                      onChange={(e) => setNewAttribute(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addAffectedAttribute();
+                        }
+                      }}
+                      placeholder="e.g., strength, agility"
+                    />
+                    <button type="button" onClick={addAffectedAttribute}>
+                      Add
+                    </button>
+                  </div>
+                  {affectedAttributes.length > 0 && (
+                    <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {affectedAttributes.map((attr, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            background: 'rgba(74, 158, 255, 0.2)',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
+                          {attr}
+                          <button
+                            type="button"
+                            onClick={() => removeAffectedAttribute(attr)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#ff6b6b',
+                              cursor: 'pointer',
+                              padding: 0,
+                              fontSize: '1.2rem',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </label>
+              </>
+            )}
+
+            <label>
+              Cost (JSON):
+              <textarea
+                value={JSON.stringify(cost, null, 2)}
+                onChange={(e) => {
+                  try {
+                    setCost(JSON.parse(e.target.value));
+                  } catch {
+                    // Invalid JSON, ignore
+                  }
+                }}
+                placeholder='{"mana": 10} or {"stamina": 5}'
+                rows={3}
+              />
+            </label>
+          </div>
+
           <div className="form-actions">
             <button className="save-btn" onClick={handleSave}>
               {selectionMode === 'pre-designed' ? 'Save & Use' : 'Use Style'}
@@ -435,6 +612,25 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                       }
                       effectorConfig.distribution_parameters = distributionParams;
                     }
+
+                    // Build style attributes
+                    const styleAttributes: any = {
+                      range,
+                      area,
+                    };
+
+                    if (styleType === 'Spell' || styleType === 'Buff' || styleType === 'Debuff') {
+                      styleAttributes.duration = duration;
+                    }
+                    
+                    if (styleType === 'Buff' || styleType === 'Debuff') {
+                      styleAttributes.affected_attributes = affectedAttributes;
+                    }
+
+                    if (Object.keys(cost).length > 0) {
+                      styleAttributes.cost = cost;
+                    }
+
                     await axios.post(
                       `${API_URL}/api/effect-styles/`,
                       {
@@ -445,6 +641,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                         process_verb: processVerb || subtype,
                         execution_probability: executionProbability,
                         effector: effectorConfig,
+                        style_attributes: styleAttributes,
                       },
                       { headers: { Authorization: `Bearer ${token}` } }
                     );
