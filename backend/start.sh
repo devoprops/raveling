@@ -11,6 +11,10 @@ fi
 # Ensure uv is in PATH
 export PATH="$HOME/.local/bin:$PATH"
 
+# Run database migrations before starting the app
+echo "Running database migrations..."
+uv run alembic upgrade head || echo "⚠️  Migration warning (continuing anyway)..."
+
 # Run the application
 uv run uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}
 
