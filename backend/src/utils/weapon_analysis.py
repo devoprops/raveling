@@ -1,7 +1,7 @@
 """Weapon damage analysis utilities for simulating weapon effects."""
 
 import random
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from src.utils.common.distributions import (
     create_distribution_function,
     sample_uniform,
