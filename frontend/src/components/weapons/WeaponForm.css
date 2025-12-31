@@ -6,14 +6,14 @@
 
 .form-section {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
   border-radius: 8px;
   padding: 1.5rem;
 }
 
 .section-title {
   margin: 0 0 1.5rem 0;
-  color: #e94560;
+  color: #4a90e2;
   font-size: 1.25rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -41,7 +41,7 @@
 .form-group textarea {
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 4px;
   color: #fff;
   font-size: 0.9rem;
@@ -51,7 +51,7 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: rgba(233, 69, 96, 0.6);
+  border-color: rgba(74, 144, 226, 0.6);
   background: rgba(0, 0, 0, 0.4);
 }
 
@@ -81,7 +81,7 @@
 .affinity-item input {
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 4px;
   color: #fff;
   font-size: 0.9rem;
@@ -89,7 +89,7 @@
 
 .affinity-item input:focus {
   outline: none;
-  border-color: rgba(233, 69, 96, 0.6);
+  border-color: rgba(74, 144, 226, 0.6);
   background: rgba(0, 0, 0, 0.4);
 }
 
@@ -98,6 +98,99 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+}
+
+/* Effect Style sections */
+.section-description {
+  color: #999;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.add-style-btn {
+  padding: 0.75rem 1.5rem;
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.add-style-btn:hover {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.5);
+}
+
+.style-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.style-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
+  border-radius: 4px;
+}
+
+.style-info {
+  flex: 1;
+  color: #c4c4c4;
+}
+
+.style-info strong {
+  color: #4a90e2;
+}
+
+.style-details {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 0.25rem;
+}
+
+.remove-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.remove-btn:hover {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.5);
+}
+
+.style-designer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.style-designer-container {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(74, 144, 226, 0.5);
+  border-radius: 8px;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
 }
 
 .checkbox-label input[type="checkbox"] {

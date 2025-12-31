@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EffectorConfig } from '../effectors/EffectorSelector';
-import SimpleEffectorSelector from './SimpleEffectorSelector';
-import EffectorList from '../effectors/EffectorList';
+import { EffectStyleConfig } from '../effectstyles';
+import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
 import ThumbnailPicker from './ThumbnailPicker';
 import './WeaponForm.css';
 
@@ -13,7 +13,9 @@ export interface WeaponFormData {
   length_cm: number;
   width_cm: number;
   material: string;
-  effectors: EffectorConfig[];
+  effectors?: EffectorConfig[]; // Deprecated, kept for backwards compatibility
+  primary_effect_styles?: EffectStyleConfig[];
+  secondary_effect_styles?: EffectStyleConfig[];
   affinities: {
     elemental: Record<string, number>;
     race: Record<string, number>;
@@ -45,6 +47,8 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     width_cm: initialData?.width_cm || 0,
     material: initialData?.material || '',
     effectors: initialData?.effectors || [],
+    primary_effect_styles: initialData?.primary_effect_styles || [],
+    secondary_effect_styles: initialData?.secondary_effect_styles || [],
     affinities: initialData?.affinities || {
       elemental: { Earth: 1.0, Water: 1.0, Air: 1.0, Fire: 1.0 },
       race: {},
@@ -58,6 +62,9 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     thumbnail_path: initialData?.thumbnail_path || '',
     restrictions: initialData?.restrictions || {},
   });
+  
+  const [showStyleDesigner, setShowStyleDesigner] = useState(false);
+  const [styleDesignerMode, setStyleDesignerMode] = useState<'primary' | 'secondary'>('primary');
 
   useEffect(() => {
     onChange(formData);
@@ -90,14 +97,45 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
   const handleAddEffector = (effector: EffectorConfig) => {
     setFormData((prev) => ({
       ...prev,
-      effectors: [...prev.effectors, effector],
+      effectors: [...(prev.effectors || []), effector],
     }));
   };
 
   const handleRemoveEffector = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      effectors: prev.effectors.filter((_, i) => i !== index),
+      effectors: (prev.effectors || []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddEffectStyle = (style: EffectStyleConfig) => {
+    setFormData((prev) => {
+      if (styleDesignerMode === 'primary') {
+        return {
+          ...prev,
+          primary_effect_styles: [...(prev.primary_effect_styles || []), style],
+        };
+      } else {
+        return {
+          ...prev,
+          secondary_effect_styles: [...(prev.secondary_effect_styles || []), style],
+        };
+      }
+    });
+    setShowStyleDesigner(false);
+  };
+
+  const handleRemovePrimaryStyle = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      primary_effect_styles: (prev.primary_effect_styles || []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleRemoveSecondaryStyle = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      secondary_effect_styles: (prev.secondary_effect_styles || []).filter((_, i) => i !== index),
     }));
   };
 
@@ -286,9 +324,95 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
       </div>
 
       <div className="form-section">
-        <h3 className="section-title">Effectors</h3>
+        <h3 className="section-title">Primary Effect Styles (Mutually Exclusive)</h3>
+        <p className="section-description">
+          Primary styles are mutually exclusive - only one executes per turn. Selection is based on subtype or relative weights.
+        </p>
+        <button
+          className="add-style-btn"
+          onClick={() => {
+            setStyleDesignerMode('primary');
+            setShowStyleDesigner(true);
+          }}
+        >
+          + Add Primary Effect Style
+        </button>
+        {(formData.primary_effect_styles || []).length > 0 && (
+          <div className="style-list">
+            {(formData.primary_effect_styles || []).map((style, index) => (
+              <div key={index} className="style-item">
+                <div className="style-info">
+                  <strong>{style.name}</strong> ({style.subtype})
+                  {style.process_verb && <span> - "{style.process_verb}"</span>}
+                  <div className="style-details">
+                    {style.style_type} • Probability: {style.execution_probability}
+                  </div>
+                </div>
+                <button
+                  className="remove-btn"
+                  onClick={() => handleRemovePrimaryStyle(index)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="form-section">
+        <h3 className="section-title">Secondary Effect Styles (Independent)</h3>
+        <p className="section-description">
+          Secondary styles execute independently based on their execution probability.
+        </p>
+        <button
+          className="add-style-btn"
+          onClick={() => {
+            setStyleDesignerMode('secondary');
+            setShowStyleDesigner(true);
+          }}
+        >
+          + Add Secondary Effect Style
+        </button>
+        {(formData.secondary_effect_styles || []).length > 0 && (
+          <div className="style-list">
+            {(formData.secondary_effect_styles || []).map((style, index) => (
+              <div key={index} className="style-item">
+                <div className="style-info">
+                  <strong>{style.name}</strong> ({style.subtype})
+                  {style.process_verb && <span> - "{style.process_verb}"</span>}
+                  <div className="style-details">
+                    {style.style_type} • Probability: {style.execution_probability}
+                  </div>
+                </div>
+                <button
+                  className="remove-btn"
+                  onClick={() => handleRemoveSecondaryStyle(index)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showStyleDesigner && (
+        <div className="style-designer-overlay">
+          <div className="style-designer-container">
+            <EffectStyleDesigner
+              onSave={handleAddEffectStyle}
+              onCancel={() => setShowStyleDesigner(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Legacy effectors section (deprecated) */}
+      <div className="form-section" style={{ opacity: 0.6 }}>
+        <h3 className="section-title">Effectors (Deprecated - Use Effect Styles)</h3>
         <SimpleEffectorSelector onAdd={handleAddEffector} />
-        <EffectorList effectors={formData.effectors} onRemove={handleRemoveEffector} />
+        <EffectorList effectors={formData.effectors || []} onRemove={handleRemoveEffector} />
       </div>
     </div>
   );

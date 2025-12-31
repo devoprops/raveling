@@ -1,8 +1,10 @@
 """Weapon base class for all weapons."""
 
+import random
 from typing import List, Dict, Any, Optional
 from src.models.items.base import Item
 from src.models.effectors.base import Effector
+from src.models.effect_styles.base import EffectStyle
 from src.utils.constants import ITEM_TYPE_WEAPON
 
 
@@ -24,7 +26,9 @@ class Weapon(Item):
         length_cm: float,
         width_cm: float,
         material: str,
-        effectors: List[Effector],
+        effectors: Optional[List[Effector]] = None,
+        primary_effect_styles: Optional[List[EffectStyle]] = None,
+        secondary_effect_styles: Optional[List[EffectStyle]] = None,
         slots: Optional[Dict[str, Effector]] = None,
         restrictions: Dict[str, Any] = None,
         affinities: Optional[Dict[str, Dict[str, float]]] = None,
@@ -44,7 +48,9 @@ class Weapon(Item):
             length_cm: Length of the weapon in centimeters
             width_cm: Width of the weapon in centimeters
             material: Material the weapon is made from
-            effectors: List of Effector instances
+            effectors: List of Effector instances (deprecated, use effect_styles instead)
+            primary_effect_styles: List of EffectStyle instances (mutually exclusive)
+            secondary_effect_styles: List of EffectStyle instances (can execute together)
             slots: Optional dictionary of slot_name -> Effector (inactive effectors)
             restrictions: Optional dictionary of restrictions
             affinities: Optional dictionary with 'elemental' and 'race' sub-dictionaries.
@@ -71,7 +77,10 @@ class Weapon(Item):
             size_constraints=size_constraints,
             thumbnail_path=thumbnail_path,
         )
+        # Keep effectors for backwards compatibility (deprecated)
         self.effectors = effectors or []
+        self.primary_effect_styles = primary_effect_styles or []
+        self.secondary_effect_styles = secondary_effect_styles or []
         self.slots = slots or {}
     
     def get_active_effectors(self, context: Optional[Dict[str, Any]] = None) -> List[Effector]:
@@ -229,6 +238,74 @@ class Weapon(Item):
         """
         effects = self.calculate_turn_weapon_effects(character, target, context)
         return effects["total_damage"]
+    
+    def select_primary_style(self, subtype: Optional[str] = None) -> Optional[EffectStyle]:
+        """
+        Select a primary effect style based on subtype or relative weights.
+        
+        Primary styles are mutually exclusive. If a subtype is specified, that style
+        is selected. Otherwise, selection is based on relative weights of execution_probability.
+        
+        Args:
+            subtype: Optional subtype to select (e.g., "slash", "thrust")
+                    If None, uses relative weight selection
+        
+        Returns:
+            Selected EffectStyle, or None if no primary styles exist
+        """
+        if not self.primary_effect_styles:
+            return None
+        
+        if subtype:
+            # Find style with matching subtype
+            for style in self.primary_effect_styles:
+                if style.subtype == subtype:
+                    return style
+            return None
+        
+        # Use relative weights
+        total_weight = sum(style.execution_probability for style in self.primary_effect_styles)
+        if total_weight == 0:
+            return None
+        
+        rand = random.random() * total_weight
+        cumulative = 0.0
+        for style in self.primary_effect_styles:
+            cumulative += style.execution_probability
+            if rand <= cumulative:
+                return style
+        
+        # Fallback to first style (shouldn't happen)
+        return self.primary_effect_styles[0]
+    
+    def calculate_primary_damage(
+        self, character: Any, target: Any, subtype: Optional[str] = None
+    ) -> float:
+        """
+        Calculate damage from primary effect styles.
+        
+        Primary styles are mutually exclusive. If subtype is specified, uses that style.
+        Otherwise, selects a style based on relative weights.
+        
+        Args:
+            character: Character using the weapon
+            target: Target character
+            subtype: Optional subtype to use (e.g., "slash", "thrust")
+        
+        Returns:
+            Damage amount (0.0 if no primary styles or style doesn't execute)
+        """
+        selected_style = self.select_primary_style(subtype)
+        if not selected_style:
+            return 0.0
+        
+        # Check execution probability
+        if random.random() >= selected_style.execution_probability:
+            return 0.0
+        
+        # Execute the style's effector
+        result = selected_style.execute(character, target)
+        return result.get("amount", 0.0)
     
     def get_damage_breakdown(self, character: Any, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """

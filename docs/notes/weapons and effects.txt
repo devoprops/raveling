@@ -1,0 +1,10 @@
+ok a few things.
+1. Let's add a layer of abstractness to the effectors.  They are really just controlling the type of effect and amount, but don't capture some additional details.  
+Let's have a base class of EffectStyle, and EffectOrchestrator that handles list or dict of effectstyles.  Effectstyles can be typed as 
+PhysicalDamage, spell, buff, debuff, regen, process and subclassed accordingly (SpellEfeectStyle, etc.).  The base stype will inclued:
+a. Name: Slash
+b. Type: PhysicalDamage etc.
+c. Description: weapon slash attack
+d: effector: one of the effector classes
+
+e. ExecutionText: (i.e. "You {action} the {target}" {kick}

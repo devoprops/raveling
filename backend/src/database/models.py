@@ -1,6 +1,6 @@
 """Database models for Raveling MUD."""
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum as SQLEnum, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum as SQLEnum, ForeignKey, Float, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
@@ -26,6 +26,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(SQLEnum(UserRole), default=UserRole.PLAYER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    user_color = Column(String, nullable=True)  # Hex color for collaboration notes
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -97,3 +98,46 @@ class ApprovedConfig(Base):
     
     # Relationships
     approved_by = relationship("User")
+
+
+class EffectStyle(Base):
+    """EffectStyle model for storing reusable effect style configurations."""
+    __tablename__ = "effect_styles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False)
+    style_type = Column(String, nullable=False, index=True)  # Physical, Spell, Buff, etc.
+    subtype = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    process_verb = Column(String, nullable=True)
+    execution_probability = Column(Float, default=1.0, nullable=False)
+    
+    # Effector configuration stored as JSON
+    effector_config = Column(JSON, nullable=False)
+    
+    # Metadata
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    created_by = relationship("User", foreign_keys=[created_by_id])
+
+
+class CollaborationNote(Base):
+    """Collaboration notes for designer types."""
+    __tablename__ = "collaboration_notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    designer_type = Column(String, nullable=False, index=True)  # weapons, skills, spells, etc.
+    content = Column(Text, nullable=False, default="")
+    
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    updated_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_notes")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_notes")

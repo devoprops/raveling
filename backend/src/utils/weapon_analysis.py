@@ -16,15 +16,13 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
     """
     Simulate weapon damage over N strikes.
     
-    For each strike:
-    - Get active effectors from weapon config
-    - For each effector:
-      - Check execution probability (random roll)
-      - If executes, sample from distribution parameters
-      - Accumulate damage
+    Supports both old effector-based configs and new EffectStyle-based configs.
+    For EffectStyles:
+    - Primary styles: Mutually exclusive, select one per strike (by subtype or relative weights)
+    - Secondary styles: Independent, execute based on execution_probability
     
     Args:
-        weapon_config: Weapon configuration dictionary containing effectors
+        weapon_config: Weapon configuration dictionary containing effectors or effect_styles
         num_strikes: Number of strikes to simulate
         
     Returns:
@@ -35,10 +33,17 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
         - damage_per_strike: List of total damage per strike
         - effector_breakdown: Dict mapping effector_id to per-strike damage lists
         - effector_cumulative: Dict mapping effector_id to cumulative damage lists
+        - style_breakdown: Dict mapping style_id to per-strike damage lists (if using styles)
+        - style_cumulative: Dict mapping style_id to cumulative damage lists (if using styles)
         - min_damage: Minimum damage value observed
         - max_damage: Maximum damage value observed
     """
+    # Check if using EffectStyles or legacy effectors
+    primary_styles = weapon_config.get("primary_effect_styles", [])
+    secondary_styles = weapon_config.get("secondary_effect_styles", [])
     effectors = weapon_config.get("effectors", [])
+    
+    use_styles = len(primary_styles) > 0 or len(secondary_styles) > 0
     
     strikes = []
     cumulative_damage = []
@@ -46,71 +51,109 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
     damage_per_strike = []
     cumulative_total = 0.0
     
-    # Track per-effector data
+    # Track per-effector data (for legacy support)
     effector_breakdown: Dict[str, List[float]] = {}
     effector_cumulative: Dict[str, List[float]] = {}
     effector_cumulative_totals: Dict[str, float] = {}
     
-    # Initialize effector tracking
-    for idx, effector in enumerate(effectors):
-        effector_id = f"{effector.get('effector_name', f'effector_{idx}')}"
-        effector_breakdown[effector_id] = []
-        effector_cumulative[effector_id] = []
-        effector_cumulative_totals[effector_id] = 0.0
+    # Track per-style data (for EffectStyles)
+    style_breakdown: Dict[str, List[float]] = {}
+    style_cumulative: Dict[str, List[float]] = {}
+    style_cumulative_totals: Dict[str, float] = {}
+    
+    if use_styles:
+        # Initialize style tracking
+        for style in primary_styles + secondary_styles:
+            style_id = style.get("name", "") or style.get("subtype", "")
+            style_breakdown[style_id] = []
+            style_cumulative[style_id] = []
+            style_cumulative_totals[style_id] = 0.0
+    else:
+        # Initialize effector tracking (legacy)
+        for idx, effector in enumerate(effectors):
+            effector_id = f"{effector.get('effector_name', f'effector_{idx}')}"
+            effector_breakdown[effector_id] = []
+            effector_cumulative[effector_id] = []
+            effector_cumulative_totals[effector_id] = 0.0
     
     for strike_num in range(1, num_strikes + 1):
         strike_damage = 0.0
-        strike_effector_damage: Dict[str, float] = {}
         
-        # Process each effector
-        for idx, effector in enumerate(effectors):
-            effector_id = f"{effector.get('effector_name', f'effector_{idx}')}"
-            strike_effector_damage[effector_id] = 0.0
+        if use_styles:
+            # Process primary styles (mutually exclusive - select one)
+            if primary_styles:
+                selected_primary = _select_primary_style(primary_styles, subtype=None)
+                selected_style_id = None
+                
+                if selected_primary:
+                    primary_damage = _execute_style_damage(selected_primary)
+                    strike_damage += primary_damage
+                    if primary_damage > 0:
+                        damage_values.append(primary_damage)
+                    
+                    selected_style_id = selected_primary.get("name", "") or selected_primary.get("subtype", "")
+                
+                # Update tracking for all primary styles
+                for style in primary_styles:
+                    style_id = style.get("name", "") or style.get("subtype", "")
+                    if style_id == selected_style_id and selected_primary:
+                        style_damage = primary_damage
+                    else:
+                        style_damage = 0.0
+                    
+                    style_breakdown[style_id].append(style_damage)
+                    style_cumulative_totals[style_id] += style_damage
+                    style_cumulative[style_id].append(style_cumulative_totals[style_id])
             
-            # Initialize this strike's damage for this effector
-            effector_damage_this_strike = 0.0
-            
-            # Check execution probability
-            execution_prob = effector.get("execution_probability", 1.0)
-            if random.random() >= execution_prob:
-                effector_breakdown[effector_id].append(0.0)
-                effector_cumulative_totals[effector_id] += 0.0
+            # Process secondary styles (independent - can all execute)
+            for style in secondary_styles:
+                style_id = style.get("name", "") or style.get("subtype", "")
+                style_damage_this_strike = 0.0
+                
+                execution_prob = style.get("execution_probability", 1.0)
+                if random.random() < execution_prob:
+                    style_damage_this_strike = _execute_style_damage(style)
+                    strike_damage += style_damage_this_strike
+                    if style_damage_this_strike > 0:
+                        damage_values.append(style_damage_this_strike)
+                
+                style_breakdown[style_id].append(style_damage_this_strike)
+                style_cumulative_totals[style_id] += style_damage_this_strike
+                style_cumulative[style_id].append(style_cumulative_totals[style_id])
+        else:
+            # Legacy effector-based processing
+            for idx, effector in enumerate(effectors):
+                effector_id = f"{effector.get('effector_name', f'effector_{idx}')}"
+                effector_damage_this_strike = 0.0
+                
+                # Check execution probability
+                execution_prob = effector.get("execution_probability", 1.0)
+                if random.random() < execution_prob:
+                    # Get effector type
+                    effector_type = effector.get("effector_type", "")
+                    
+                    # Only process damage effectors for now
+                    if effector_type == "damage":
+                        # Get distribution parameters
+                        dist_params = effector.get("distribution_parameters", {})
+                        if dist_params:
+                            dist_type = dist_params.get("type", "uniform")
+                            params = dist_params.get("params", {})
+                            
+                            # Sample damage from distribution
+                            try:
+                                damage = _sample_damage(dist_type, params)
+                                damage = max(0.0, damage)  # Ensure non-negative
+                                strike_damage += damage
+                                effector_damage_this_strike = damage
+                                damage_values.append(damage)
+                            except Exception as e:
+                                print(f"Warning: Failed to sample damage for effector: {e}")
+                
+                # Update effector tracking
+                effector_breakdown[effector_id].append(effector_damage_this_strike)
+                effector_cumulative_totals[effector_id] += effector_damage_this_strike
                 effector_cumulative[effector_id].append(effector_cumulative_totals[effector_id])
-                continue  # Effector doesn't execute this strike
-            
-            # Get effector type
-            effector_type = effector.get("effector_type", "")
-            
-            # Only process damage effectors for now
-            if effector_type == "damage":
-                # Get distribution parameters
-                dist_params = effector.get("distribution_parameters", {})
-                if not dist_params:
-                    effector_breakdown[effector_id].append(0.0)
-                    effector_cumulative_totals[effector_id] += 0.0
-                    effector_cumulative[effector_id].append(effector_cumulative_totals[effector_id])
-                    continue
-                
-                dist_type = dist_params.get("type", "uniform")
-                params = dist_params.get("params", {})
-                
-                # Sample damage from distribution
-                try:
-                    damage = _sample_damage(dist_type, params)
-                    damage = max(0.0, damage)  # Ensure non-negative
-                    strike_damage += damage
-                    strike_effector_damage[effector_id] = damage
-                    damage_values.append(damage)
-                    effector_damage_this_strike = damage
-                except Exception as e:
-                    # Skip this effector if distribution sampling fails
-                    print(f"Warning: Failed to sample damage for effector: {e}")
-                    effector_damage_this_strike = 0.0
-            
-            # Update effector tracking (whether it executed or not)
-            effector_breakdown[effector_id].append(effector_damage_this_strike)
-            effector_cumulative_totals[effector_id] += effector_damage_this_strike
-            effector_cumulative[effector_id].append(effector_cumulative_totals[effector_id])
         
         # Update cumulative damage
         cumulative_total += strike_damage
@@ -122,16 +165,92 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
     min_damage = min(damage_values) if damage_values else 0.0
     max_damage = max(damage_values) if damage_values else 0.0
     
-    return {
+    result = {
         "strikes": strikes,
         "cumulative_damage": cumulative_damage,
         "damage_values": damage_values,
         "damage_per_strike": damage_per_strike,
-        "effector_breakdown": effector_breakdown,
-        "effector_cumulative": effector_cumulative,
         "min_damage": min_damage,
         "max_damage": max_damage,
     }
+    
+    if use_styles:
+        result["style_breakdown"] = style_breakdown
+        result["style_cumulative"] = style_cumulative
+    else:
+        result["effector_breakdown"] = effector_breakdown
+        result["effector_cumulative"] = effector_cumulative
+    
+    return result
+
+
+def _select_primary_style(primary_styles: List[Dict[str, Any]], subtype: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """
+    Select a primary effect style based on subtype or relative weights.
+    
+    Args:
+        primary_styles: List of primary style configs
+        subtype: Optional subtype to select
+        
+    Returns:
+        Selected style config, or None
+    """
+    if not primary_styles:
+        return None
+    
+    if subtype:
+        # Find style with matching subtype
+        for style in primary_styles:
+            if style.get("subtype") == subtype:
+                return style
+        return None
+    
+    # Use relative weights
+    total_weight = sum(style.get("execution_probability", 1.0) for style in primary_styles)
+    if total_weight == 0:
+        return None
+    
+    rand = random.random() * total_weight
+    cumulative = 0.0
+    for style in primary_styles:
+        cumulative += style.get("execution_probability", 1.0)
+        if rand <= cumulative:
+            return style
+    
+    # Fallback to first style
+    return primary_styles[0]
+
+
+def _execute_style_damage(style: Dict[str, Any]) -> float:
+    """
+    Execute a style's effector and return damage amount.
+    
+    Args:
+        style: Style configuration dictionary
+        
+    Returns:
+        Damage amount (0.0 if not damage or execution fails)
+    """
+    effector = style.get("effector", {})
+    effector_type = effector.get("effector_type", "")
+    
+    if effector_type != "damage":
+        return 0.0
+    
+    # Get distribution parameters
+    dist_params = effector.get("distribution_parameters", {})
+    if not dist_params:
+        return 0.0
+    
+    dist_type = dist_params.get("type", "uniform")
+    params = dist_params.get("params", {})
+    
+    try:
+        damage = _sample_damage(dist_type, params)
+        return max(0.0, damage)
+    except Exception as e:
+        print(f"Warning: Failed to sample damage for style {style.get('name', 'unknown')}: {e}")
+        return 0.0
 
 
 def _sample_damage(dist_type: str, params: Dict[str, Any]) -> float:

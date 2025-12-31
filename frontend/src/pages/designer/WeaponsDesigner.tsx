@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { WeaponForm, WeaponFormData } from '../../components/weapons';
 import PreviewTabs from '../../components/weapons/PreviewTabs';
+import NotesButton from '../../components/collaboration/NotesButton';
 import './designer-page.css';
 import './weapons-designer.css';
 
@@ -81,6 +82,7 @@ export default function WeaponsDesigner() {
             <p className="page-subtitle">Create and manage weapon configurations</p>
           </div>
           <div className="weapon-actions">
+            <NotesButton designerType="weapons" />
             <button onClick={handleSave} className="save-btn">
               Save
             </button>

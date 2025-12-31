@@ -1,6 +1,6 @@
 .analysis-tools {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -16,7 +16,7 @@
 
 .analysis-title {
   margin: 0;
-  color: #e94560;
+  color: #4a90e2;
   font-size: 1.25rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -38,7 +38,7 @@
 .strikes-input {
   padding: 0.5rem;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 4px;
   color: #fff;
   font-size: 0.9rem;
@@ -47,16 +47,16 @@
 
 .strikes-input:focus {
   outline: none;
-  border-color: rgba(233, 69, 96, 0.6);
+  border-color: rgba(74, 144, 226, 0.6);
   background: rgba(0, 0, 0, 0.4);
 }
 
 .analyze-btn {
   padding: 0.5rem 1.5rem;
-  background: rgba(233, 69, 96, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.4);
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.4);
   border-radius: 4px;
-  color: #e94560;
+  color: #4a90e2;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
@@ -64,8 +64,8 @@
 }
 
 .analyze-btn:hover:not(:disabled) {
-  background: rgba(233, 69, 96, 0.3);
-  border-color: rgba(233, 69, 96, 0.6);
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.6);
 }
 
 .analyze-btn:disabled {
@@ -74,11 +74,11 @@
 }
 
 .analysis-error {
-  color: #e94560;
+  color: #4a90e2;
   font-size: 0.85rem;
   padding: 0.75rem;
-  background: rgba(233, 69, 96, 0.1);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.1);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 4px;
   margin-bottom: 1rem;
 }
@@ -107,21 +107,21 @@
 }
 
 .stat-value {
-  color: #e94560;
+  color: #4a90e2;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .chart-container {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
   border-radius: 8px;
   padding: 1rem;
 }
 
 .chart-title {
   margin: 0 0 1rem 0;
-  color: #e94560;
+  color: #4a90e2;
   font-size: 1.1rem;
 }
 

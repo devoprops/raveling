@@ -23,7 +23,39 @@ export default function YAMLPreview({ weaponConfig }: YAMLPreviewProps) {
         material: weaponConfig.material || '',
       };
 
-      // Add effectors
+      // Add effect styles (new system)
+      if (
+        (weaponConfig.primary_effect_styles && weaponConfig.primary_effect_styles.length > 0) ||
+        (weaponConfig.secondary_effect_styles && weaponConfig.secondary_effect_styles.length > 0)
+      ) {
+        yamlConfig.effect_styles = {};
+        
+        if (weaponConfig.primary_effect_styles && weaponConfig.primary_effect_styles.length > 0) {
+          yamlConfig.effect_styles.primary = weaponConfig.primary_effect_styles.map((style: any) => ({
+            name: style.name,
+            style_type: style.style_type,
+            subtype: style.subtype,
+            description: style.description,
+            process_verb: style.process_verb,
+            execution_probability: style.execution_probability,
+            effector: style.effector,
+          }));
+        }
+        
+        if (weaponConfig.secondary_effect_styles && weaponConfig.secondary_effect_styles.length > 0) {
+          yamlConfig.effect_styles.secondary = weaponConfig.secondary_effect_styles.map((style: any) => ({
+            name: style.name,
+            style_type: style.style_type,
+            subtype: style.subtype,
+            description: style.description,
+            process_verb: style.process_verb,
+            execution_probability: style.execution_probability,
+            effector: style.effector,
+          }));
+        }
+      }
+
+      // Add effectors (deprecated, kept for backwards compatibility)
       if (weaponConfig.effectors && weaponConfig.effectors.length > 0) {
         yamlConfig.effectors = weaponConfig.effectors.map((effector: any) => {
           const effectorConfig: any = {

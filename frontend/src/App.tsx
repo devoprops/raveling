@@ -13,6 +13,7 @@ import CharactersDesigner from './pages/designer/CharactersDesigner';
 import WearablesDesigner from './pages/designer/WearablesDesigner';
 import WeaponsDesigner from './pages/designer/WeaponsDesigner';
 import ConsumablesDesigner from './pages/designer/ConsumablesDesigner';
+import CollaborationArea from './components/collaboration/CollaborationArea';
 import UserManagement from './pages/admin/UserManagement';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
             <Route path="wearables/*" element={<WearablesDesigner />} />
             <Route path="weapons/*" element={<WeaponsDesigner />} />
             <Route path="consumables/*" element={<ConsumablesDesigner />} />
+            <Route path="collaboration" element={<CollaborationArea />} />
           </Route>
           
           <Route

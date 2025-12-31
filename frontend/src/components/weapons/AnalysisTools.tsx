@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import apiClient from '../../utils/api';
+import { COLORS, ELEMENT_COLORS, COLORS_RGBA } from '../../constants/colors';
 import './AnalysisTools.css';
 
 interface AnalysisToolsProps {
@@ -29,24 +30,14 @@ interface AnalysisData {
   max_damage: number;
 }
 
-// Color mapping for effectors
-const ELEMENT_COLORS: Record<string, string> = {
-  Earth: '#8B4513', // Brown
-  Water: '#1E90FF', // Blue
-  Air: '#87CEEB',   // Sky blue
-  Fire: '#FF4500',  // Orange red
-};
-
-const DAMAGE_COLOR = '#808080'; // Grey for physical damage
-
 function getEffectorColor(effector: any): string {
   if (effector.effector_type === 'damage') {
     if (effector.damage_subtype === 'elemental' && effector.element_type) {
-      return ELEMENT_COLORS[effector.element_type] || '#e94560';
+      return ELEMENT_COLORS[effector.element_type] || COLORS.PRIMARY_BLUE;
     }
-    return DAMAGE_COLOR;
+    return COLORS.DAMAGE_PHYSICAL;
   }
-  return '#e94560'; // Default color
+  return COLORS.PRIMARY_BLUE; // Default color
 }
 
 export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
@@ -209,7 +200,7 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
             <h4 className="chart-title">Cumulative Damage Over Strikes</h4>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={cumulativeData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(233, 69, 96, 0.2)" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS_RGBA.PRIMARY_BLUE_20} />
                 <XAxis
                   dataKey="strike"
                   stroke="#c4c4c4"
@@ -218,16 +209,16 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                 <YAxis stroke="#c4c4c4" style={{ fontSize: '0.85rem' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    border: '1px solid rgba(233, 69, 96, 0.3)',
-                    color: '#c4c4c4',
+                    backgroundColor: COLORS.OVERLAY_DARK,
+                    border: `1px solid ${COLORS_RGBA.PRIMARY_BLUE_30}`,
+                    color: COLORS.TEXT_SECONDARY,
                   }}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="Overall"
-                  stroke="#e94560"
+                  stroke={COLORS.PRIMARY_BLUE}
                   strokeWidth={2}
                   dot={false}
                   name="Overall"
@@ -252,7 +243,7 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
             <h4 className="chart-title">Damage vs Call (Per Strike)</h4>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={damageVsCallData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(233, 69, 96, 0.2)" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS_RGBA.PRIMARY_BLUE_20} />
                 <XAxis
                   dataKey="strike"
                   stroke="#c4c4c4"
@@ -261,16 +252,16 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                 <YAxis stroke="#c4c4c4" style={{ fontSize: '0.85rem' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    border: '1px solid rgba(233, 69, 96, 0.3)',
-                    color: '#c4c4c4',
+                    backgroundColor: COLORS.OVERLAY_DARK,
+                    border: `1px solid ${COLORS_RGBA.PRIMARY_BLUE_30}`,
+                    color: COLORS.TEXT_SECONDARY,
                   }}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="Overall"
-                  stroke="#e94560"
+                  stroke={COLORS.PRIMARY_BLUE}
                   strokeWidth={2}
                   dot={false}
                   name="Overall"
@@ -295,7 +286,7 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
             <h4 className="chart-title">Damage Distribution</h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={distributionData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(233, 69, 96, 0.2)" />
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS_RGBA.PRIMARY_BLUE_20} />
                 <XAxis
                   dataKey="range"
                   stroke="#c4c4c4"
@@ -307,13 +298,13 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                 <YAxis stroke="#c4c4c4" style={{ fontSize: '0.85rem' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    border: '1px solid rgba(233, 69, 96, 0.3)',
-                    color: '#c4c4c4',
+                    backgroundColor: COLORS.OVERLAY_DARK,
+                    border: `1px solid ${COLORS_RGBA.PRIMARY_BLUE_30}`,
+                    color: COLORS.TEXT_SECONDARY,
                   }}
                 />
                 <Legend />
-                <Bar dataKey="count" fill="#e94560" name="Frequency" />
+                <Bar dataKey="count" fill={COLORS.PRIMARY_BLUE} name="Frequency" />
               </BarChart>
             </ResponsiveContainer>
           </div>

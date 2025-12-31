@@ -1,6 +1,6 @@
 .yaml-preview {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -8,12 +8,12 @@
 .yaml-preview-header {
   padding: 1rem;
   background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(233, 69, 96, 0.2);
+  border-bottom: 1px solid rgba(74, 144, 226, 0.2);
 }
 
 .yaml-preview-title {
   margin: 0;
-  color: #e94560;
+  color: #4a90e2;
   font-size: 1.1rem;
 }
 

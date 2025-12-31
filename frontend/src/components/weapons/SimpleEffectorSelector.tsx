@@ -147,9 +147,24 @@ export default function SimpleEffectorSelector({ onAdd }: SimpleEffectorSelector
                   type="number"
                   min="0"
                   max="1"
-                  step="0.01"
+                  step="0.05"
                   value={executionProbability}
-                  onChange={(e) => setExecutionProbability(parseFloat(e.target.value) || 1.0)}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val)) {
+                      setExecutionProbability(val);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (isNaN(val) || val < 0) {
+                      setExecutionProbability(0);
+                    } else if (val > 1) {
+                      setExecutionProbability(1);
+                    } else {
+                      setExecutionProbability(val);
+                    }
+                  }}
                 />
               </label>
             </div>

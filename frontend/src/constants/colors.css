@@ -1,0 +1,75 @@
+/**
+ * CSS Custom Properties (CSS Variables) for colors.
+ * Import this file in your main CSS or use these variables in component CSS.
+ */
+
+:root {
+  /* Primary Blues */
+  --color-primary-blue: #4a90e2;
+  --color-primary-blue-light: #7db8e8;
+  --color-primary-blue-dark: #2c5aa0;
+  
+  /* Primary Greens */
+  --color-primary-green: #5cb85c;
+  --color-primary-green-light: #7dd87d;
+  --color-primary-green-dark: #3d8b3d;
+  
+  /* Additional Blues/Greens */
+  --color-sky-blue: #6ab3d3;
+  --color-lime-green: #8bc34a;
+  --color-medium-blue: #5e9fd4;
+  --color-medium-green: #66bb6a;
+  --color-bright-blue: #42a5f5;
+  --color-bright-green: #4caf50;
+  
+  /* Error/Destructive (keep red) */
+  --color-error: #e94560;
+  --color-error-light: #ff6b9d;
+  --color-error-dark: #c93550;
+  
+  /* Neutral Colors */
+  --color-background: #0f1419;
+  --color-background-light: #1a1a2e;
+  --color-background-dark: #0a0f14;
+  --color-text-primary: rgba(255, 255, 255, 0.87);
+  --color-text-secondary: #c4c4c4;
+  --color-text-muted: #999;
+  --color-text-disabled: #666;
+  
+  /* Borders and Overlays */
+  --color-border: rgba(74, 144, 226, 0.3);
+  --color-border-light: rgba(74, 144, 226, 0.2);
+  --color-border-dark: rgba(74, 144, 226, 0.5);
+  --color-overlay: rgba(0, 0, 0, 0.3);
+  --color-overlay-light: rgba(0, 0, 0, 0.2);
+  --color-overlay-dark: rgba(0, 0, 0, 0.5);
+  
+  /* Element Colors */
+  --color-element-earth: #8b4513;
+  --color-element-water: #4169e1;
+  --color-element-air: #87ceeb;
+  --color-element-fire: #ff4500;
+  
+  /* Damage Colors */
+  --color-damage-physical: #808080;
+  
+  /* RGBA variants */
+  --color-primary-blue-10: rgba(74, 144, 226, 0.1);
+  --color-primary-blue-20: rgba(74, 144, 226, 0.2);
+  --color-primary-blue-30: rgba(74, 144, 226, 0.3);
+  --color-primary-blue-40: rgba(74, 144, 226, 0.4);
+  --color-primary-blue-50: rgba(74, 144, 226, 0.5);
+  --color-primary-blue-60: rgba(74, 144, 226, 0.6);
+  
+  --color-primary-green-10: rgba(92, 184, 92, 0.1);
+  --color-primary-green-20: rgba(92, 184, 92, 0.2);
+  --color-primary-green-30: rgba(92, 184, 92, 0.3);
+  
+  --color-error-10: rgba(233, 69, 96, 0.1);
+  --color-error-20: rgba(233, 69, 96, 0.2);
+  --color-error-30: rgba(233, 69, 96, 0.3);
+  --color-error-40: rgba(233, 69, 96, 0.4);
+  --color-error-50: rgba(233, 69, 96, 0.5);
+  --color-error-60: rgba(233, 69, 96, 0.6);
+}
+

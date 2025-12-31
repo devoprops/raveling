@@ -12,10 +12,10 @@
 .save-btn,
 .load-btn {
   padding: 0.75rem 1.5rem;
-  background: rgba(233, 69, 96, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.4);
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.4);
   border-radius: 4px;
-  color: #e94560;
+  color: #4a90e2;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
@@ -24,13 +24,13 @@
 
 .save-btn:hover,
 .load-btn:hover {
-  background: rgba(233, 69, 96, 0.3);
-  border-color: rgba(233, 69, 96, 0.6);
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.6);
 }
 
 .weapons-designer-content {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(233, 69, 96, 0.2);
+  border: 1px solid rgba(74, 144, 226, 0.2);
   border-radius: 8px;
   padding: 2rem;
 }
@@ -60,12 +60,12 @@
 }
 
 .weapons-designer-form-section::-webkit-scrollbar-thumb {
-  background: rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.3);
   border-radius: 4px;
 }
 
 .weapons-designer-form-section::-webkit-scrollbar-thumb:hover {
-  background: rgba(233, 69, 96, 0.5);
+  background: rgba(74, 144, 226, 0.5);
 }
 
 .weapons-designer-preview-section {
@@ -87,12 +87,12 @@
 }
 
 .weapons-designer-preview-section::-webkit-scrollbar-thumb {
-  background: rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.3);
   border-radius: 4px;
 }
 
 .weapons-designer-preview-section::-webkit-scrollbar-thumb:hover {
-  background: rgba(233, 69, 96, 0.5);
+  background: rgba(74, 144, 226, 0.5);
 }
 
 @media (max-width: 1200px) {

@@ -13,11 +13,11 @@
 
 .user-management-header h1 {
   margin: 0;
-  color: #e94560;
+  color: #4a90e2;
 }
 
 .create-button {
-  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+  background: linear-gradient(135deg, #4a90e2 0%, #ff6b9d 100%);
   border: none;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -29,12 +29,12 @@
 
 .create-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
 }
 
 .users-table {
   background: rgba(15, 20, 25, 0.6);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -45,25 +45,25 @@
 }
 
 .users-table thead {
-  background: rgba(233, 69, 96, 0.2);
+  background: rgba(74, 144, 226, 0.2);
 }
 
 .users-table th {
   padding: 1rem;
   text-align: left;
-  color: #e94560;
+  color: #4a90e2;
   font-weight: bold;
-  border-bottom: 2px solid rgba(233, 69, 96, 0.3);
+  border-bottom: 2px solid rgba(74, 144, 226, 0.3);
 }
 
 .users-table td {
   padding: 1rem;
-  border-bottom: 1px solid rgba(233, 69, 96, 0.1);
+  border-bottom: 1px solid rgba(74, 144, 226, 0.1);
   color: #c4c4c4;
 }
 
 .users-table tbody tr:hover {
-  background: rgba(233, 69, 96, 0.05);
+  background: rgba(74, 144, 226, 0.05);
 }
 
 .role-badge {
@@ -75,7 +75,7 @@
 }
 
 .role-admin {
-  background: rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.3);
   color: #ff6b9d;
 }
 
@@ -154,17 +154,17 @@
 }
 
 .delete-button {
-  background: rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.3);
   color: #ff6b9d;
 }
 
 .delete-button:hover {
-  background: rgba(233, 69, 96, 0.5);
+  background: rgba(74, 144, 226, 0.5);
 }
 
 .create-user-form {
   background: rgba(15, 20, 25, 0.8);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 2rem;
@@ -172,7 +172,7 @@
 
 .create-user-form h2 {
   margin-top: 0;
-  color: #e94560;
+  color: #4a90e2;
 }
 
 .create-user-form .form-group {
@@ -192,7 +192,7 @@
 .create-user-form select {
   width: 100%;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 6px;
   padding: 0.75rem;
   color: #fff;
@@ -210,8 +210,8 @@
 }
 
 .error-message {
-  background: rgba(233, 69, 96, 0.2);
-  border: 1px solid #e94560;
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid #4a90e2;
   color: #ff6b9d;
   padding: 1rem;
   border-radius: 6px;

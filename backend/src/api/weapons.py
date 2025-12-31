@@ -26,8 +26,10 @@ class DamageAnalysisResponse(BaseModel):
     cumulative_damage: list[float]
     damage_values: list[float]
     damage_per_strike: list[float]
-    effector_breakdown: Dict[str, list[float]]
-    effector_cumulative: Dict[str, list[float]]
+    effector_breakdown: Optional[Dict[str, list[float]]] = None
+    effector_cumulative: Optional[Dict[str, list[float]]] = None
+    style_breakdown: Optional[Dict[str, list[float]]] = None
+    style_cumulative: Optional[Dict[str, list[float]]] = None
     min_damage: float
     max_damage: float
 

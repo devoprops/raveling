@@ -15,7 +15,7 @@ else:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api import auth, items, skills, characters, approval, users, effectors, weapons
+from src.api import auth, items, skills, characters, approval, users, effectors, weapons, effect_styles, collaboration
 
 # Initialize database tables on startup
 try:
@@ -53,6 +53,8 @@ app.include_router(characters.router, prefix="/api/characters", tags=["character
 app.include_router(approval.router, prefix="/api/approval", tags=["approval"])
 app.include_router(effectors.router, prefix="/api/effectors", tags=["effectors"])
 app.include_router(weapons.router, prefix="/api/weapons", tags=["weapons"])
+app.include_router(effect_styles.router, prefix="/api/effect-styles", tags=["effect-styles"])
+app.include_router(collaboration.router, prefix="/api/collaboration", tags=["collaboration"])
 
 
 @app.get("/")

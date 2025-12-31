@@ -7,7 +7,7 @@
 .preview-tabs-header {
   display: flex;
   gap: 0.5rem;
-  border-bottom: 2px solid rgba(233, 69, 96, 0.3);
+  border-bottom: 2px solid rgba(74, 144, 226, 0.3);
   margin-bottom: 1rem;
 }
 
@@ -25,13 +25,13 @@
 }
 
 .preview-tab:hover {
-  color: #e94560;
-  background: rgba(233, 69, 96, 0.1);
+  color: #4a90e2;
+  background: rgba(74, 144, 226, 0.1);
 }
 
 .preview-tab.active {
-  color: #e94560;
-  border-bottom-color: #e94560;
+  color: #4a90e2;
+  border-bottom-color: #4a90e2;
 }
 
 .preview-tabs-content {
@@ -49,11 +49,11 @@
 }
 
 .preview-tabs-content::-webkit-scrollbar-thumb {
-  background: rgba(233, 69, 96, 0.3);
+  background: rgba(74, 144, 226, 0.3);
   border-radius: 4px;
 }
 
 .preview-tabs-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(233, 69, 96, 0.5);
+  background: rgba(74, 144, 226, 0.5);
 }
 
