@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import apiClient from '../../utils/api';
 import { WeaponForm, WeaponFormData } from '../../components/weapons';
 import PreviewTabs from '../../components/weapons/PreviewTabs';
 import NotesButton from '../../components/collaboration/NotesButton';
@@ -30,17 +31,21 @@ export default function WeaponsDesigner() {
     setWeaponConfig(data);
   };
 
-  const handleSave = () => {
-    const dataStr = JSON.stringify(weaponConfig, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${weaponConfig.name || 'weapon'}_config.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleSave = async () => {
+    if (!weaponConfig.name) {
+      alert('Please enter a weapon name before saving');
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/weapons/save-config', {
+        weapon_config: weaponConfig,
+      });
+      alert(`Weapon "${weaponConfig.name}" saved successfully to GitHub!`);
+    } catch (error: any) {
+      console.error('Failed to save weapon:', error);
+      alert(`Failed to save weapon: ${error.response?.data?.detail || error.message}`);
+    }
   };
 
   const handleLoad = () => {

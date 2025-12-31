@@ -68,6 +68,61 @@ async def analyze_damage(
         )
 
 
+class WeaponConfigRequest(BaseModel):
+    """Request schema for saving weapon config."""
+    weapon_config: Dict[str, Any]
+
+
+@router.post("/save-config")
+async def save_weapon_config(
+    request: WeaponConfigRequest,
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    Save a weapon configuration to GitHub storage.
+    
+    Args:
+        request: Contains weapon_config dictionary
+        
+    Returns:
+        Dictionary with commit_sha and file_path
+    """
+    try:
+        weapon_name = request.weapon_config.get("name", "unnamed_weapon")
+        if not weapon_name or weapon_name == "unnamed_weapon":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Weapon name is required"
+            )
+        
+        # Save to GitHub
+        try:
+            commit_sha = github_storage.save_config(
+                config_type="weapon",
+                name=weapon_name,
+                content=request.weapon_config,
+                commit_message=f"Save weapon config: {weapon_name}"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to save weapon config to GitHub: {str(e)}"
+            )
+        
+        return {
+            "commit_sha": commit_sha,
+            "file_path": github_storage.get_file_path("weapon", weapon_name)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save weapon config: {str(e)}"
+        )
+
+
 @router.post("/upload-thumbnail")
 async def upload_thumbnail(
     item_name: str,

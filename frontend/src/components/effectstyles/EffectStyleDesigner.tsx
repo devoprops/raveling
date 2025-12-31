@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 import DistributionParameterWidget, { DistributionParameters } from '../weapons/DistributionParameterWidget';
 import './EffectStyleDesigner.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 import { ELEMENTS as ALL_ELEMENTS } from '../../utils/constants';
 
@@ -65,11 +63,27 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
   const [elementType, setElementType] = useState<string>(effector?.element_type || '');
   const [baseDamage, setBaseDamage] = useState<number>(effector?.base_damage || 0);
   
-  // Distribution parameters
+  // Distribution parameters - initialize mean from base damage if available
+  const initialDistributionParams = effector?.distribution_parameters || {};
+  const initialMean = initialDistributionParams.params?.mean ?? (baseDamage > 0 ? baseDamage : 10);
   const [distributionParams, setDistributionParams] = useState<DistributionParameters>({
-    type: effector?.distribution_parameters?.type || 'uniform',
-    params: effector?.distribution_parameters?.params || { min_val: 0, max_val: 10 },
+    type: initialDistributionParams.type || 'uniform',
+    params: initialDistributionParams.params || { 
+      ...(initialDistributionParams.type === 'gaussian' || initialDistributionParams.type === 'skewnorm' 
+        ? { mean: initialMean, std_dev: 2 } 
+        : { min_val: 0, max_val: 10 })
+    },
   });
+
+  // Update distribution mean when base damage changes (for gaussian/skewnorm)
+  useEffect(() => {
+    if (baseDamage > 0 && (distributionParams.type === 'gaussian' || distributionParams.type === 'skewnorm')) {
+      setDistributionParams(prev => ({
+        ...prev,
+        params: { ...prev.params, mean: baseDamage },
+      }));
+    }
+  }, [baseDamage]);
 
   // Style attributes (type-specific)
   const [range, setRange] = useState<number>(initialStyle?.style_attributes?.range ?? 1);
@@ -98,9 +112,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
 
   const loadPreDesignedStyles = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/effect-styles/`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await apiClient.get('/api/effect-styles/', {
         params: { style_type: styleType },
       });
       
@@ -126,12 +138,25 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
     setEffectorName(effector.effector_name || '');
     setDamageSubtype(effector.damage_subtype || 'physical');
     setElementType(effector.element_type || '');
-    setBaseDamage(effector.base_damage || 0);
+    const baseDmg = effector.base_damage || 0;
+    setBaseDamage(baseDmg);
     
     if (effector.distribution_parameters) {
+      const distParams = effector.distribution_parameters;
+      // If gaussian/skewnorm and no mean specified, use base damage
+      const params = distParams.params || {};
+      if ((distParams.type === 'gaussian' || distParams.type === 'skewnorm') && !params.mean && baseDmg > 0) {
+        params.mean = baseDmg;
+      }
       setDistributionParams({
-        type: effector.distribution_parameters.type || 'uniform',
-        params: effector.distribution_parameters.params || {},
+        type: distParams.type || 'uniform',
+        params: params,
+      });
+    } else if (baseDmg > 0) {
+      // Initialize with base damage as mean if no distribution params
+      setDistributionParams({
+        type: 'gaussian',
+        params: { mean: baseDmg, std_dev: 2 },
       });
     }
 
@@ -203,12 +228,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
     // If pre-designed and we want to save to library
     if (selectionMode === 'pre-designed' && selectedPreDesignedId) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.put(
-          `${API_URL}/api/effect-styles/${selectedPreDesignedId}`,
-          styleConfig,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await apiClient.put(`/api/effect-styles/${selectedPreDesignedId}`, styleConfig);
       } catch (error) {
         console.error('Failed to save to library:', error);
         alert('Failed to save to library, but style will be used inline');
@@ -472,7 +492,17 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                     type="number"
                     step="0.1"
                     value={baseDamage}
-                    onChange={(e) => setBaseDamage(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => {
+                      const newBaseDamage = parseFloat(e.target.value) || 0;
+                      setBaseDamage(newBaseDamage);
+                      // Update distribution mean if using gaussian or skewnorm
+                      if (newBaseDamage > 0 && (distributionParams.type === 'gaussian' || distributionParams.type === 'skewnorm')) {
+                        setDistributionParams(prev => ({
+                          ...prev,
+                          params: { ...prev.params, mean: newBaseDamage },
+                        }));
+                      }
+                    }}
                   />
                 </label>
 
@@ -607,7 +637,6 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                   await handleSave();
                   // Also save to library as new
                   try {
-                    const token = localStorage.getItem('token');
                     const effectorConfig: any = {
                       effector_type: effectorType,
                       effector_name: effectorName || `${name}_effector`,
@@ -639,9 +668,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                       styleAttributes.cost = cost;
                     }
 
-                    await axios.post(
-                      `${API_URL}/api/effect-styles/`,
-                      {
+                    await apiClient.post('/api/effect-styles/', {
                         name,
                         style_type: styleType,
                         subtype,
@@ -650,9 +677,7 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                         execution_probability: executionProbability,
                         effector: effectorConfig,
                         style_attributes: styleAttributes,
-                      },
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    );
+                      });
                     alert('Style saved to library!');
                   } catch (error) {
                     console.error('Failed to save to library:', error);

@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 import { EffectStyleConfig } from '../../components/effectstyles/EffectStyleDesigner';
 import EffectStyleDesigner from '../../components/effectstyles/EffectStyleDesigner';
 import NotesButton from '../../components/collaboration/NotesButton';
 import './designer-page.css';
 import './weapons-designer.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 interface EffectStyleListItem {
   id: number;
@@ -37,10 +35,7 @@ export default function EffectStylesDesigner() {
   const loadStyles = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/effect-styles/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await apiClient.get('/api/effect-styles/');
 
       // Flatten the tree structure into a single array
       const allStyles: EffectStyleListItem[] = [];
@@ -85,10 +80,7 @@ export default function EffectStylesDesigner() {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/effect-styles/${styleId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await apiClient.delete(`/api/effect-styles/${styleId}`);
       await loadStyles();
     } catch (error) {
       console.error('Failed to delete effect style:', error);
@@ -98,22 +90,12 @@ export default function EffectStylesDesigner() {
 
   const handleSave = async (styleConfig: EffectStyleConfig) => {
     try {
-      const token = localStorage.getItem('token');
-      
       if (editingStyle) {
         // Update existing style
-        await axios.put(
-          `${API_URL}/api/effect-styles/${editingStyle.id}`,
-          styleConfig,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await apiClient.put(`/api/effect-styles/${editingStyle.id}`, styleConfig);
       } else {
         // Create new style
-        await axios.post(
-          `${API_URL}/api/effect-styles/`,
-          styleConfig,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await apiClient.post('/api/effect-styles/', styleConfig);
       }
 
       setShowDesigner(false);
