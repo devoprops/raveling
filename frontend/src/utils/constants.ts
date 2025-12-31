@@ -110,6 +110,12 @@ export const DESIGNER_NAVIGATION: DesignerNavItem[] = [
     ],
   },
   {
+    id: "effect-styles",
+    label: "Effect Styles",
+    path: "/designer/effect-styles",
+    icon: "🎨",
+  },
+  {
     id: "zones",
     label: "Zones",
     path: "/designer/zones",

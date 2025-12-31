@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { EffectorConfig } from '../effectors/EffectorSelector';
+import EffectorList from '../effectors/EffectorList';
 import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
 import ThumbnailPicker from './ThumbnailPicker';
+import SimpleEffectorSelector from './SimpleEffectorSelector';
 import './WeaponForm.css';
 
 export interface WeaponFormData {

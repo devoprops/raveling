@@ -44,7 +44,7 @@ interface EffectStyleDesignerProps {
 
 export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: EffectStyleDesignerProps) {
   const [styleType, setStyleType] = useState<string>(initialStyle?.style_type || '');
-  const [selectionMode, setSelectionMode] = useState<'pre-designed' | 'custom'>('custom');
+  const [selectionMode, setSelectionMode] = useState<'pre-designed' | 'custom'>(initialStyle ? 'custom' : 'custom');
   const [preDesignedStyles, setPreDesignedStyles] = useState<any[]>([]);
   const [selectedPreDesignedId, setSelectedPreDesignedId] = useState<number | null>(null);
   
@@ -54,17 +54,18 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
   const [processVerb, setProcessVerb] = useState<string>(initialStyle?.process_verb || '');
   const [executionProbability, setExecutionProbability] = useState<number>(initialStyle?.execution_probability ?? 1.0);
   
-  // Effector fields
-  const [effectorType, setEffectorType] = useState<string>(initialStyle?.effector?.effector_type || 'damage');
-  const [effectorName, setEffectorName] = useState<string>(initialStyle?.effector?.effector_name || '');
-  const [damageSubtype, setDamageSubtype] = useState<string>(initialStyle?.effector?.damage_subtype || 'physical');
-  const [elementType, setElementType] = useState<string>(initialStyle?.effector?.element_type || '');
-  const [baseDamage, setBaseDamage] = useState<number>(initialStyle?.effector?.base_damage || 0);
+  // Effector fields - handle both effector and effectors
+  const effector = initialStyle?.effector || (initialStyle?.effectors && initialStyle.effectors[0]) || {};
+  const [effectorType, setEffectorType] = useState<string>(effector?.effector_type || 'damage');
+  const [effectorName, setEffectorName] = useState<string>(effector?.effector_name || '');
+  const [damageSubtype, setDamageSubtype] = useState<string>(effector?.damage_subtype || 'physical');
+  const [elementType, setElementType] = useState<string>(effector?.element_type || '');
+  const [baseDamage, setBaseDamage] = useState<number>(effector?.base_damage || 0);
   
   // Distribution parameters
   const [distributionParams, setDistributionParams] = useState<DistributionParameters>({
-    type: 'uniform',
-    params: initialStyle?.effector?.distribution_parameters?.params || { min_val: 0, max_val: 10 },
+    type: effector?.distribution_parameters?.type || 'uniform',
+    params: effector?.distribution_parameters?.params || { min_val: 0, max_val: 10 },
   });
 
   // Style attributes (type-specific)

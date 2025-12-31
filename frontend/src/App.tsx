@@ -8,6 +8,7 @@ import GameplayPage from './pages/GameplayPage';
 import DesignerSuite from './pages/designer/DesignerSuite';
 import SkillsDesigner from './pages/designer/SkillsDesigner';
 import SpellsDesigner from './pages/designer/SpellsDesigner';
+import EffectStylesDesigner from './pages/designer/EffectStylesDesigner';
 import ZonesDesigner from './pages/designer/ZonesDesigner';
 import CharactersDesigner from './pages/designer/CharactersDesigner';
 import WearablesDesigner from './pages/designer/WearablesDesigner';
@@ -36,6 +37,7 @@ function App() {
             <Route index element={<Navigate to="/designer/skills" replace />} />
             <Route path="skills/*" element={<SkillsDesigner />} />
             <Route path="spells/*" element={<SpellsDesigner />} />
+            <Route path="effect-styles/*" element={<EffectStylesDesigner />} />
             <Route path="zones/*" element={<ZonesDesigner />} />
             <Route path="characters/*" element={<CharactersDesigner />} />
             <Route path="wearables/*" element={<WearablesDesigner />} />
