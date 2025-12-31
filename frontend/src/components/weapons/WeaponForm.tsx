@@ -5,6 +5,7 @@ import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
 import ThumbnailPicker from './ThumbnailPicker';
 import SimpleEffectorSelector from './SimpleEffectorSelector';
+import { ELEMENTS, createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './WeaponForm.css';
 
 export interface WeaponFormData {
@@ -37,8 +38,6 @@ interface WeaponFormProps {
   onChange: (data: WeaponFormData) => void;
 }
 
-const ELEMENTS = ['Earth', 'Water', 'Air', 'Fire'];
-
 export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
   const [formData, setFormData] = useState<WeaponFormData>({
     name: initialData?.name || '',
@@ -51,14 +50,8 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     effectors: initialData?.effectors || [],
     primary_effect_styles: initialData?.primary_effect_styles || [],
     secondary_effect_styles: initialData?.secondary_effect_styles || [],
-    affinities: initialData?.affinities || {
-      elemental: { Earth: 1.0, Water: 1.0, Air: 1.0, Fire: 1.0 },
-      race: {},
-    },
-    detriments: initialData?.detriments || {
-      elemental: { Earth: 1.0, Water: 1.0, Air: 1.0, Fire: 1.0 },
-      race: {},
-    },
+    affinities: initialData?.affinities || createDefaultAffinities(),
+    detriments: initialData?.detriments || createDefaultDetriments(),
     auxiliary_slots: initialData?.auxiliary_slots || 0,
     size_constraints: initialData?.size_constraints || null,
     thumbnail_path: initialData?.thumbnail_path || '',

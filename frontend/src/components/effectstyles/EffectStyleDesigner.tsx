@@ -5,9 +5,12 @@ import './EffectStyleDesigner.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+import { ELEMENTS as ALL_ELEMENTS } from '../../utils/constants';
+
 const STYLE_TYPES = ['Physical', 'Spell', 'Buff', 'Debuff', 'Regen', 'Process'];
 const EFFECTOR_TYPES = ['damage', 'regenerative', 'buff', 'debuff', 'process'];
-const ELEMENTS = ['earth', 'water', 'air', 'fire'];
+// Convert to lowercase for effector element types (backend uses lowercase)
+const ELEMENTS = ALL_ELEMENTS.map(e => e.toLowerCase());
 const DAMAGE_SUBTYPES = ['physical', 'elemental'];
 
 export interface EffectStyleConfig {
@@ -450,11 +453,15 @@ export default function EffectStyleDesigner({ onSave, onCancel, initialStyle }: 
                       onChange={(e) => setElementType(e.target.value)}
                     >
                       <option value="">Select element...</option>
-                      {ELEMENTS.map((element) => (
-                        <option key={element} value={element}>
-                          {element.charAt(0).toUpperCase() + element.slice(1)}
-                        </option>
-                      ))}
+                      {ELEMENTS.map((element) => {
+                        // Convert lowercase to proper case for display
+                        const displayName = element.charAt(0).toUpperCase() + element.slice(1);
+                        return (
+                          <option key={element} value={element}>
+                            {displayName}
+                          </option>
+                        );
+                      })}
                     </select>
                   </label>
                 )}

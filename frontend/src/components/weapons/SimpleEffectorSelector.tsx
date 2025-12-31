@@ -3,7 +3,7 @@ import { EffectorConfig } from '../effectors/EffectorSelector';
 import './SimpleEffectorSelector.css';
 
 const EFFECTOR_TYPES = ['damage', 'regenerative', 'buff', 'debuff', 'process'];
-const ELEMENTS = ['Earth', 'Water', 'Air', 'Fire'];
+import { ELEMENTS } from '../../utils/constants';
 const DAMAGE_SUBTYPES = ['physical', 'elemental'];
 const DISTRIBUTION_TYPES = ['uniform', 'gaussian', 'skewnorm', 'bimodal', 'die_roll'];
 

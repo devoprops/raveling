@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { WeaponForm, WeaponFormData } from '../../components/weapons';
 import PreviewTabs from '../../components/weapons/PreviewTabs';
 import NotesButton from '../../components/collaboration/NotesButton';
+import { createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './designer-page.css';
 import './weapons-designer.css';
 
@@ -15,14 +16,8 @@ export default function WeaponsDesigner() {
     width_cm: 0,
     material: '',
     effectors: [],
-    affinities: {
-      elemental: { Earth: 1.0, Water: 1.0, Air: 1.0, Fire: 1.0 },
-      race: {},
-    },
-    detriments: {
-      elemental: { Earth: 1.0, Water: 1.0, Air: 1.0, Fire: 1.0 },
-      race: {},
-    },
+    affinities: createDefaultAffinities(),
+    detriments: createDefaultDetriments(),
     auxiliary_slots: 0,
     size_constraints: null,
     thumbnail_path: '',

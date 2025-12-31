@@ -65,13 +65,76 @@ export const EQUIPMENT_SLOTS = [
   SLOT_AMULET,
 ];
 
-// Elemental types
-export const ELEMENT_METAL = "metal";
-export const ELEMENT_WATER = "water";
-export const ELEMENT_WOOD = "wood";
-export const ELEMENT_FIRE = "fire";
-export const ELEMENT_EARTH = "earth";
-export const ELEMENTS = [ELEMENT_METAL, ELEMENT_WATER, ELEMENT_WOOD, ELEMENT_FIRE, ELEMENT_EARTH];
+// Elemental types - centralized definition
+export const ELEMENT_EARTH = "Earth";
+export const ELEMENT_WATER = "Water";
+export const ELEMENT_AIR = "Air";
+export const ELEMENT_FIRE = "Fire";
+export const ELEMENT_LIGHTNING = "Lightning";
+export const ELEMENT_ICE = "Ice";
+export const ELEMENT_POISON = "Poison";
+export const ELEMENT_SONIC = "Sonic";
+export const ELEMENT_PSYCHIC = "Psychic";
+
+// All elements in a single array
+export const ELEMENTS = [
+  ELEMENT_EARTH,
+  ELEMENT_WATER,
+  ELEMENT_AIR,
+  ELEMENT_FIRE,
+  ELEMENT_LIGHTNING,
+  ELEMENT_ICE,
+  ELEMENT_POISON,
+  ELEMENT_SONIC,
+  ELEMENT_PSYCHIC,
+];
+
+// Element display names (for UI)
+export const ELEMENT_DISPLAY_NAMES: Record<string, string> = {
+  [ELEMENT_EARTH]: "Earth",
+  [ELEMENT_WATER]: "Water",
+  [ELEMENT_AIR]: "Air",
+  [ELEMENT_FIRE]: "Fire",
+  [ELEMENT_LIGHTNING]: "Lightning",
+  [ELEMENT_ICE]: "Ice",
+  [ELEMENT_POISON]: "Poison",
+  [ELEMENT_SONIC]: "Sonic",
+  [ELEMENT_PSYCHIC]: "Psychic",
+};
+
+// Helper function to create default elemental affinities (all set to 1.0)
+export function createDefaultElementAffinities(): Record<string, number> {
+  const affinities: Record<string, number> = {};
+  ELEMENTS.forEach(element => {
+    affinities[element] = 1.0;
+  });
+  return affinities;
+}
+
+// Helper function to create default elemental detriments (all set to 1.0)
+export function createDefaultElementDetriments(): Record<string, number> {
+  const detriments: Record<string, number> = {};
+  ELEMENTS.forEach(element => {
+    detriments[element] = 1.0;
+  });
+  return detriments;
+}
+
+// Helper function to create default affinities object (elemental + race)
+export function createDefaultAffinities() {
+  return {
+    elemental: createDefaultElementAffinities(),
+    race: {} as Record<string, number>,
+  };
+}
+
+// Helper function to create default detriments object (elemental + race)
+export function createDefaultDetriments() {
+  return {
+    elemental: createDefaultElementDetriments(),
+    race: {} as Record<string, number>,
+  };
+}
 
 // Designer navigation structure
 export interface DesignerNavItem {
