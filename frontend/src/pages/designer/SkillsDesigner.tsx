@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import apiClient from '../../utils/api';
 import { SkillForm, SkillFormData } from '../../components/skills';
 import YAMLPreview from '../../components/skills/YAMLPreview';
 import NotesButton from '../../components/collaboration/NotesButton';
@@ -17,47 +18,63 @@ export default function SkillsDesigner() {
     detriments: createDefaultDetriments(),
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [availableConfigs, setAvailableConfigs] = useState<string[]>([]);
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [loadingConfigs, setLoadingConfigs] = useState(false);
+
+  useEffect(() => {
+    loadAvailableConfigs();
+  }, []);
+
+  const loadAvailableConfigs = async () => {
+    try {
+      setLoadingConfigs(true);
+      const response = await apiClient.get('/api/skills/list-configs');
+      setAvailableConfigs(response.data.configs || []);
+    } catch (error) {
+      console.error('Failed to load available configs:', error);
+    } finally {
+      setLoadingConfigs(false);
+    }
+  };
 
   const handleFormChange = (data: SkillFormData) => {
     setSkillConfig(data);
   };
 
-  const handleSave = () => {
-    const dataStr = JSON.stringify(skillConfig, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${skillConfig.name || 'skill'}_config.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleSave = async () => {
+    if (!skillConfig.name) {
+      alert('Please enter a skill name before saving');
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/skills/save-config', {
+        skill_config: skillConfig,
+      });
+      alert(`Skill "${skillConfig.name}" saved successfully to GitHub!`);
+      await loadAvailableConfigs();
+    } catch (error: any) {
+      console.error('Failed to save skill:', error);
+      alert(`Failed to save skill: ${error.response?.data?.detail || error.message}`);
+    }
   };
 
   const handleLoad = () => {
-    fileInputRef.current?.click();
+    setShowLoadModal(true);
+    loadAvailableConfigs();
   };
 
-  const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const loadedConfig = JSON.parse(e.target?.result as string);
-        setSkillConfig(loadedConfig);
-      } catch (error) {
-        alert('Failed to load config file. Please check the file format.');
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleLoadConfig = async (configName: string) => {
+    try {
+      const response = await apiClient.get(`/api/skills/load-config/${configName}`);
+      const loadedConfig = response.data.skill_config;
+      setSkillConfig(loadedConfig);
+      setShowLoadModal(false);
+      alert(`Loaded skill config: ${configName}`);
+    } catch (error: any) {
+      console.error('Failed to load config:', error);
+      alert(`Failed to load config: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -77,13 +94,6 @@ export default function SkillsDesigner() {
             <button onClick={handleLoad} className="load-btn">
               Load
             </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleFileLoad}
-              style={{ display: 'none' }}
-            />
           </div>
         </div>
       </div>
@@ -97,6 +107,36 @@ export default function SkillsDesigner() {
           </div>
         </div>
       </div>
+
+      {showLoadModal && (
+        <div className="modal-overlay" onClick={() => setShowLoadModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Load Skill Config</h2>
+              <button className="modal-close" onClick={() => setShowLoadModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {loadingConfigs ? (
+                <p>Loading configs...</p>
+              ) : availableConfigs.length === 0 ? (
+                <p>No skill configs found in GitHub storage.</p>
+              ) : (
+                <div className="config-list">
+                  {availableConfigs.map((configName) => (
+                    <div
+                      key={configName}
+                      className="config-item"
+                      onClick={() => handleLoadConfig(configName)}
+                    >
+                      {configName}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 """Skills API routes."""
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -291,3 +291,107 @@ async def delete_skill(
     db.commit()
     
     return None
+
+
+@router.get("/list-configs")
+async def list_skill_configs(
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    List all skill configurations from GitHub storage.
+    
+    Returns:
+        List of skill config names
+    """
+    try:
+        config_names = github_storage.list_configs("skill")
+        return {"configs": config_names}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list skill configs: {str(e)}"
+        )
+
+
+@router.get("/load-config/{skill_name}")
+async def load_skill_config(
+    skill_name: str,
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    Load a skill configuration from GitHub storage.
+    
+    Args:
+        skill_name: Name of the skill config to load
+        
+    Returns:
+        Skill configuration dictionary
+    """
+    try:
+        config = github_storage.load_config("skill", skill_name)
+        return {"skill_config": config}
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Skill config '{skill_name}' not found"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to load skill config: {str(e)}"
+        )
+
+
+class SkillConfigRequest(BaseModel):
+    """Request schema for saving skill config."""
+    skill_config: Dict[str, Any]
+
+
+@router.post("/save-config")
+async def save_skill_config(
+    request: SkillConfigRequest,
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    Save a skill configuration to GitHub storage.
+    
+    Args:
+        skill_config: Skill configuration dictionary
+        
+    Returns:
+        Dictionary with commit_sha and file_path
+    """
+    try:
+        skill_name = request.skill_config.get("name", "unnamed_skill")
+        if not skill_name or skill_name == "unnamed_skill":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Skill name is required"
+            )
+        
+        # Save to GitHub
+        try:
+            commit_sha = github_storage.save_config(
+                config_type="skill",
+                name=skill_name,
+                content=request.skill_config,
+                commit_message=f"Save skill config: {skill_name}"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to save skill config to GitHub: {str(e)}"
+            )
+        
+        return {
+            "commit_sha": commit_sha,
+            "file_path": github_storage.get_file_path("skill", skill_name)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save skill config: {str(e)}"
+        )

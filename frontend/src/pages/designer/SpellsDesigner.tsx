@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import apiClient from '../../utils/api';
 import { SpellForm, SpellFormData } from '../../components/spells';
 import YAMLPreview from '../../components/spells/YAMLPreview';
 import NotesButton from '../../components/collaboration/NotesButton';
@@ -18,47 +19,63 @@ export default function SpellsDesigner() {
     detriments: createDefaultDetriments(),
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [availableConfigs, setAvailableConfigs] = useState<string[]>([]);
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [loadingConfigs, setLoadingConfigs] = useState(false);
+
+  useEffect(() => {
+    loadAvailableConfigs();
+  }, []);
+
+  const loadAvailableConfigs = async () => {
+    try {
+      setLoadingConfigs(true);
+      const response = await apiClient.get('/api/spells/list-configs');
+      setAvailableConfigs(response.data.configs || []);
+    } catch (error) {
+      console.error('Failed to load available configs:', error);
+    } finally {
+      setLoadingConfigs(false);
+    }
+  };
 
   const handleFormChange = (data: SpellFormData) => {
     setSpellConfig(data);
   };
 
-  const handleSave = () => {
-    const dataStr = JSON.stringify(spellConfig, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${spellConfig.name || 'spell'}_config.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleSave = async () => {
+    if (!spellConfig.name) {
+      alert('Please enter a spell name before saving');
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/spells/save-config', {
+        spell_config: spellConfig,
+      });
+      alert(`Spell "${spellConfig.name}" saved successfully to GitHub!`);
+      await loadAvailableConfigs();
+    } catch (error: any) {
+      console.error('Failed to save spell:', error);
+      alert(`Failed to save spell: ${error.response?.data?.detail || error.message}`);
+    }
   };
 
   const handleLoad = () => {
-    fileInputRef.current?.click();
+    setShowLoadModal(true);
+    loadAvailableConfigs();
   };
 
-  const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const loadedConfig = JSON.parse(e.target?.result as string);
-        setSpellConfig(loadedConfig);
-      } catch (error) {
-        alert('Failed to load config file. Please check the file format.');
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleLoadConfig = async (configName: string) => {
+    try {
+      const response = await apiClient.get(`/api/spells/load-config/${configName}`);
+      const loadedConfig = response.data.spell_config;
+      setSpellConfig(loadedConfig);
+      setShowLoadModal(false);
+      alert(`Loaded spell config: ${configName}`);
+    } catch (error: any) {
+      console.error('Failed to load config:', error);
+      alert(`Failed to load config: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -78,13 +95,6 @@ export default function SpellsDesigner() {
             <button onClick={handleLoad} className="load-btn">
               Load
             </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleFileLoad}
-              style={{ display: 'none' }}
-            />
           </div>
         </div>
       </div>
@@ -98,6 +108,36 @@ export default function SpellsDesigner() {
           </div>
         </div>
       </div>
+
+      {showLoadModal && (
+        <div className="modal-overlay" onClick={() => setShowLoadModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Load Spell Config</h2>
+              <button className="modal-close" onClick={() => setShowLoadModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {loadingConfigs ? (
+                <p>Loading configs...</p>
+              ) : availableConfigs.length === 0 ? (
+                <p>No spell configs found in GitHub storage.</p>
+              ) : (
+                <div className="config-list">
+                  {availableConfigs.map((configName) => (
+                    <div
+                      key={configName}
+                      className="config-item"
+                      onClick={() => handleLoadConfig(configName)}
+                    >
+                      {configName}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

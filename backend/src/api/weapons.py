@@ -73,6 +73,55 @@ class WeaponConfigRequest(BaseModel):
     weapon_config: Dict[str, Any]
 
 
+@router.get("/list-configs")
+async def list_weapon_configs(
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    List all weapon configurations from GitHub storage.
+    
+    Returns:
+        List of weapon config names
+    """
+    try:
+        config_names = github_storage.list_configs("weapon")
+        return {"configs": config_names}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list weapon configs: {str(e)}"
+        )
+
+
+@router.get("/load-config/{weapon_name}")
+async def load_weapon_config(
+    weapon_name: str,
+    current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.DESIGNER)),
+):
+    """
+    Load a weapon configuration from GitHub storage.
+    
+    Args:
+        weapon_name: Name of the weapon config to load
+        
+    Returns:
+        Weapon configuration dictionary
+    """
+    try:
+        config = github_storage.load_config("weapon", weapon_name)
+        return {"weapon_config": config}
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Weapon config '{weapon_name}' not found"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to load weapon config: {str(e)}"
+        )
+
+
 @router.post("/save-config")
 async def save_weapon_config(
     request: WeaponConfigRequest,
