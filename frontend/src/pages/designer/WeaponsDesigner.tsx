@@ -19,7 +19,7 @@ export default function WeaponsDesigner() {
     affinities: createDefaultAffinities(),
     detriments: createDefaultDetriments(),
     auxiliary_slots: 0,
-    size_constraints: null,
+    size_constraints: [0, 100],
     thumbnail_path: '',
     restrictions: {},
   });

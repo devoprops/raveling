@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { EffectorConfig } from '../effectors/EffectorSelector';
-import EffectorList from '../effectors/EffectorList';
 import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
 import ThumbnailPicker from './ThumbnailPicker';
-import SimpleEffectorSelector from './SimpleEffectorSelector';
-import { ELEMENTS, createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
+import ElementAffinitiesWidget from '../common/ElementAffinitiesWidget';
+import { createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './WeaponForm.css';
 
 export interface WeaponFormData {
@@ -28,7 +26,7 @@ export interface WeaponFormData {
     race: Record<string, number>;
   };
   auxiliary_slots: number;
-  size_constraints: [number, number] | null;
+  size_constraints: [number, number];
   thumbnail_path: string;
   restrictions?: Record<string, any>;
 }
@@ -53,7 +51,7 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     affinities: initialData?.affinities || createDefaultAffinities(),
     detriments: initialData?.detriments || createDefaultDetriments(),
     auxiliary_slots: initialData?.auxiliary_slots || 0,
-    size_constraints: initialData?.size_constraints || null,
+    size_constraints: initialData?.size_constraints || [0, 100],
     thumbnail_path: initialData?.thumbnail_path || '',
     restrictions: initialData?.restrictions || {},
   });
@@ -89,19 +87,6 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     }));
   };
 
-  const handleAddEffector = (effector: EffectorConfig) => {
-    setFormData((prev) => ({
-      ...prev,
-      effectors: [...(prev.effectors || []), effector],
-    }));
-  };
-
-  const handleRemoveEffector = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      effectors: (prev.effectors || []).filter((_, i) => i !== index),
-    }));
-  };
 
   const handleAddEffectStyle = (style: EffectStyleConfig) => {
     setFormData((prev) => {
@@ -134,12 +119,11 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
     }));
   };
 
-  const toggleSizeConstraints = () => {
-    if (formData.size_constraints) {
-      updateField('size_constraints', null);
-    } else {
-      updateField('size_constraints', [0, 100]);
-    }
+  const updateSizeConstraints = (index: 0 | 1, value: number) => {
+    const current = formData.size_constraints || [0, 100];
+    const updated = [...current] as [number, number];
+    updated[index] = value;
+    updateField('size_constraints', updated);
   };
 
   return (
@@ -183,138 +167,6 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
             placeholder="Detailed description"
             rows={3}
           />
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">Physical Properties</h3>
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Weight (kg)</label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.weight_kg}
-              onChange={(e) => updateField('weight_kg', parseFloat(e.target.value) || 0)}
-            />
-          </div>
-          <div className="form-group">
-            <label>Length (cm)</label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.length_cm}
-              onChange={(e) => updateField('length_cm', parseFloat(e.target.value) || 0)}
-            />
-          </div>
-          <div className="form-group">
-            <label>Width (cm)</label>
-            <input
-              type="number"
-              step="0.1"
-              value={formData.width_cm}
-              onChange={(e) => updateField('width_cm', parseFloat(e.target.value) || 0)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">Thumbnail</h3>
-        <ThumbnailPicker
-          thumbnailPath={formData.thumbnail_path}
-          itemName={formData.name || 'weapon'}
-          onThumbnailChange={(path) => updateField('thumbnail_path', path)}
-        />
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">Elemental Affinities</h3>
-        <div className="affinity-grid">
-          {ELEMENTS.map((element) => (
-            <div key={element} className="affinity-item">
-              <label>{element}</label>
-              <input
-                type="number"
-                step="0.1"
-                value={formData.affinities.elemental[element] || 1.0}
-                onChange={(e) => updateAffinity('elemental', element, parseFloat(e.target.value) || 1.0)}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">Elemental Detriments</h3>
-        <div className="affinity-grid">
-          {ELEMENTS.map((element) => (
-            <div key={element} className="affinity-item">
-              <label>{element}</label>
-              <input
-                type="number"
-                step="0.1"
-                value={formData.detriments.elemental[element] || 1.0}
-                onChange={(e) => updateDetriment('elemental', element, parseFloat(e.target.value) || 1.0)}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="section-title">Additional Properties</h3>
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Auxiliary Slots</label>
-            <input
-              type="number"
-              min="0"
-              value={formData.auxiliary_slots}
-              onChange={(e) => updateField('auxiliary_slots', parseInt(e.target.value) || 0)}
-            />
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={formData.size_constraints !== null}
-              onChange={toggleSizeConstraints}
-            />
-            Enable Size Constraints
-          </label>
-          {formData.size_constraints && (
-            <div className="size-constraints-inputs">
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={formData.size_constraints[0]}
-                onChange={(e) =>
-                  updateField('size_constraints', [
-                    parseInt(e.target.value) || 0,
-                    formData.size_constraints![1],
-                  ])
-                }
-                placeholder="Min"
-              />
-              <span>to</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={formData.size_constraints[1]}
-                onChange={(e) =>
-                  updateField('size_constraints', [
-                    formData.size_constraints![0],
-                    parseInt(e.target.value) || 100,
-                  ])
-                }
-                placeholder="Max"
-              />
-            </div>
-          )}
         </div>
       </div>
 
@@ -392,6 +244,95 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
         )}
       </div>
 
+      <div className="form-section">
+        <h3 className="section-title">Physical Properties</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+          <div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Weight (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.weight_kg}
+                  onChange={(e) => updateField('weight_kg', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Length (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.length_cm}
+                  onChange={(e) => updateField('length_cm', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Width (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.width_cm}
+                  onChange={(e) => updateField('width_cm', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+            </div>
+            <div className="form-grid" style={{ marginTop: '1rem' }}>
+              <div className="form-group">
+                <label>Auxiliary Slots</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.auxiliary_slots}
+                  onChange={(e) => updateField('auxiliary_slots', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Size Constraints</label>
+                <div className="size-constraints-inputs">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.size_constraints?.[0] ?? 0}
+                    onChange={(e) => updateSizeConstraints(0, parseInt(e.target.value) || 0)}
+                    placeholder="Min"
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.size_constraints?.[1] ?? 100}
+                    onChange={(e) => updateSizeConstraints(1, parseInt(e.target.value) || 100)}
+                    placeholder="Max"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Thumbnail</h4>
+            <div style={{ aspectRatio: '1', maxWidth: '300px' }}>
+              <ThumbnailPicker
+                thumbnailPath={formData.thumbnail_path}
+                itemName={formData.name || 'weapon'}
+                onThumbnailChange={(path) => updateField('thumbnail_path', path)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="form-section">
+        <ElementAffinitiesWidget
+          affinities={formData.affinities}
+          detriments={formData.detriments}
+          onAffinityChange={(element, value) => updateAffinity('elemental', element, value)}
+          onDetrimentChange={(element, value) => updateDetriment('elemental', element, value)}
+        />
+      </div>
+
       {showStyleDesigner && (
         <div className="style-designer-overlay">
           <div className="style-designer-container">
@@ -402,13 +343,6 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
           </div>
         </div>
       )}
-
-      {/* Legacy effectors section (deprecated) */}
-      <div className="form-section" style={{ opacity: 0.6 }}>
-        <h3 className="section-title">Effectors (Deprecated - Use Effect Styles)</h3>
-        <SimpleEffectorSelector onAdd={handleAddEffector} />
-        <EffectorList effectors={formData.effectors || []} onRemove={handleRemoveEffector} />
-      </div>
     </div>
   );
 }

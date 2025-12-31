@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { SkillForm, SkillFormData } from '../../components/skills';
 import YAMLPreview from '../../components/skills/YAMLPreview';
 import NotesButton from '../../components/collaboration/NotesButton';
+import { createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './designer-page.css';
 import './weapons-designer.css';
 
@@ -12,6 +13,8 @@ export default function SkillsDesigner() {
     long_desc: '',
     effect_styles: [],
     category: '',
+    affinities: createDefaultAffinities(),
+    detriments: createDefaultDetriments(),
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);

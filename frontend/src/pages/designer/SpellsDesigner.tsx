@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { SpellForm, SpellFormData } from '../../components/spells';
 import YAMLPreview from '../../components/spells/YAMLPreview';
 import NotesButton from '../../components/collaboration/NotesButton';
+import { createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './designer-page.css';
 import './weapons-designer.css';
 
@@ -13,6 +14,8 @@ export default function SpellsDesigner() {
     effect_styles: [],
     category: '',
     school: '',
+    affinities: createDefaultAffinities(),
+    detriments: createDefaultDetriments(),
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);

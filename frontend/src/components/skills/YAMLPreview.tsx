@@ -53,6 +53,22 @@ export default function YAMLPreview({ skillConfig }: YAMLPreviewProps) {
         });
       }
 
+      // Add affinities
+      if (skillConfig.affinities) {
+        yamlConfig.affinities = {
+          elemental: skillConfig.affinities.elemental || {},
+          race: skillConfig.affinities.race || {},
+        };
+      }
+
+      // Add detriments
+      if (skillConfig.detriments) {
+        yamlConfig.detriments = {
+          elemental: skillConfig.detriments.elemental || {},
+          race: skillConfig.detriments.race || {},
+        };
+      }
+
       return yaml.stringify(yamlConfig, { indent: 2 });
     } catch (error) {
       return `Error generating YAML: ${error}`;

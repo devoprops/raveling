@@ -23,12 +23,23 @@
 }
 
 .thumbnail-preview {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border: 2px solid rgba(74, 144, 226, 0.3);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.3);
+}
+
+.thumbnail-preview-container {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.thumbnail-preview-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .thumbnail-upload-area {
@@ -42,6 +53,8 @@
   background: rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: all 0.3s ease;
+  aspect-ratio: 1;
+  min-height: 200px;
 }
 
 .thumbnail-upload-area:hover {

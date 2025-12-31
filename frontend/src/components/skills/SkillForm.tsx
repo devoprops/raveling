@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
+import ElementAffinitiesWidget from '../common/ElementAffinitiesWidget';
+import { createDefaultAffinities, createDefaultDetriments } from '../../utils/constants';
 import './SkillForm.css';
 
 export interface SkillFormData {
@@ -9,6 +11,14 @@ export interface SkillFormData {
   long_desc: string;
   effect_styles: EffectStyleConfig[];
   category?: string; // e.g., "combat", "utility", etc.
+  affinities: {
+    elemental: Record<string, number>;
+    race?: Record<string, number>;
+  };
+  detriments: {
+    elemental: Record<string, number>;
+    race?: Record<string, number>;
+  };
 }
 
 interface SkillFormProps {
@@ -23,6 +33,8 @@ export default function SkillForm({ initialData, onChange }: SkillFormProps) {
     long_desc: initialData?.long_desc || '',
     effect_styles: initialData?.effect_styles || [],
     category: initialData?.category || '',
+    affinities: initialData?.affinities || createDefaultAffinities(),
+    detriments: initialData?.detriments || createDefaultDetriments(),
   });
   
   const [showStyleDesigner, setShowStyleDesigner] = useState(false);
@@ -33,6 +45,26 @@ export default function SkillForm({ initialData, onChange }: SkillFormProps) {
 
   const updateField = <K extends keyof SkillFormData>(field: K, value: SkillFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateAffinity = (element: string, value: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      affinities: {
+        ...prev.affinities,
+        elemental: { ...prev.affinities.elemental, [element]: value },
+      },
+    }));
+  };
+
+  const updateDetriment = (element: string, value: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      detriments: {
+        ...prev.detriments,
+        elemental: { ...prev.detriments.elemental, [element]: value },
+      },
+    }));
   };
 
   const handleAddEffectStyle = (style: EffectStyleConfig) => {
@@ -124,6 +156,15 @@ export default function SkillForm({ initialData, onChange }: SkillFormProps) {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="form-section">
+        <ElementAffinitiesWidget
+          affinities={formData.affinities}
+          detriments={formData.detriments}
+          onAffinityChange={updateAffinity}
+          onDetrimentChange={updateDetriment}
+        />
       </div>
 
       {showStyleDesigner && (
