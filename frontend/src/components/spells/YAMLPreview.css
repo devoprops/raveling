@@ -17,5 +17,13 @@
 }
 
 .yaml-preview-content {
+  max-height: 600px;
+  overflow: auto;
   overflow-x: auto;
+  overflow-y: auto;
+}
+
+.yaml-preview-content pre {
+  margin: 0 !important;
+  padding: 1rem !important;
 }
