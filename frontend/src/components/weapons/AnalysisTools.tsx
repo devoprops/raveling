@@ -286,17 +286,24 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                   dot={false}
                   name="Overall"
                 />
-                {styleOrEffectorInfo.map((item) => (
-                  <Line
-                    key={item.id}
-                    type="monotone"
-                    dataKey={item.id}
-                    stroke={item.color}
-                    strokeWidth={2}
-                    dot={false}
-                    name={item.name}
-                  />
-                ))}
+                {styleOrEffectorInfo.map((item, index) => {
+                  // Check if this is a primary style
+                  const isPrimary = weaponConfig.primary_effect_styles?.some(
+                    (style: any) => (style.name || style.subtype) === item.id
+                  );
+                  return (
+                    <Line
+                      key={item.id}
+                      type="monotone"
+                      dataKey={item.id}
+                      stroke={item.color}
+                      strokeWidth={2}
+                      strokeDasharray={isPrimary ? "5 5" : "0"}
+                      dot={false}
+                      name={item.name}
+                    />
+                  );
+                })}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -329,17 +336,24 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                   dot={false}
                   name="Overall"
                 />
-                {styleOrEffectorInfo.map((item) => (
-                  <Line
-                    key={item.id}
-                    type="monotone"
-                    dataKey={item.id}
-                    stroke={item.color}
-                    strokeWidth={2}
-                    dot={false}
-                    name={item.name}
-                  />
-                ))}
+                {styleOrEffectorInfo.map((item, index) => {
+                  // Check if this is a primary style
+                  const isPrimary = weaponConfig.primary_effect_styles?.some(
+                    (style: any) => (style.name || style.subtype) === item.id
+                  );
+                  return (
+                    <Line
+                      key={item.id}
+                      type="monotone"
+                      dataKey={item.id}
+                      stroke={item.color}
+                      strokeWidth={2}
+                      strokeDasharray={isPrimary ? "5 5" : "0"}
+                      dot={false}
+                      name={item.name}
+                    />
+                  );
+                })}
               </LineChart>
             </ResponsiveContainer>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import apiClient from '../../utils/api';
 import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
 import ThumbnailPicker from './ThumbnailPicker';
@@ -58,10 +59,36 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
   
   const [showStyleDesigner, setShowStyleDesigner] = useState(false);
   const [styleDesignerMode, setStyleDesignerMode] = useState<'primary' | 'secondary'>('primary');
+  const [editingStyleIndex, setEditingStyleIndex] = useState<number | null>(null);
+  const [showLoadStyleModal, setShowLoadStyleModal] = useState(false);
 
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
+
+  // Update formData when initialData changes (e.g., when loading a config)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name ?? '',
+        short_desc: initialData.short_desc ?? '',
+        long_desc: initialData.long_desc ?? '',
+        weight_kg: initialData.weight_kg ?? 0,
+        length_cm: initialData.length_cm ?? 0,
+        width_cm: initialData.width_cm ?? 0,
+        material: initialData.material ?? '',
+        effectors: initialData.effectors ?? [],
+        primary_effect_styles: initialData.primary_effect_styles ?? [],
+        secondary_effect_styles: initialData.secondary_effect_styles ?? [],
+        affinities: initialData.affinities ?? createDefaultAffinities(),
+        detriments: initialData.detriments ?? createDefaultDetriments(),
+        auxiliary_slots: initialData.auxiliary_slots ?? 0,
+        size_constraints: initialData.size_constraints ?? [0, 100],
+        thumbnail_path: initialData.thumbnail_path ?? '',
+        restrictions: initialData.restrictions ?? {},
+      });
+    }
+  }, [initialData]);
 
   const updateField = <K extends keyof WeaponFormData>(field: K, value: WeaponFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -91,18 +118,95 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
   const handleAddEffectStyle = (style: EffectStyleConfig) => {
     setFormData((prev) => {
       if (styleDesignerMode === 'primary') {
-        return {
-          ...prev,
-          primary_effect_styles: [...(prev.primary_effect_styles || []), style],
-        };
+        if (editingStyleIndex !== null) {
+          // Replace existing style
+          const newStyles = [...(prev.primary_effect_styles || [])];
+          newStyles[editingStyleIndex] = style;
+          return { ...prev, primary_effect_styles: newStyles };
+        } else {
+          // Add new style
+          return {
+            ...prev,
+            primary_effect_styles: [...(prev.primary_effect_styles || []), style],
+          };
+        }
       } else {
-        return {
-          ...prev,
-          secondary_effect_styles: [...(prev.secondary_effect_styles || []), style],
-        };
+        if (editingStyleIndex !== null) {
+          // Replace existing style
+          const newStyles = [...(prev.secondary_effect_styles || [])];
+          newStyles[editingStyleIndex] = style;
+          return { ...prev, secondary_effect_styles: newStyles };
+        } else {
+          // Add new style
+          return {
+            ...prev,
+            secondary_effect_styles: [...(prev.secondary_effect_styles || []), style],
+          };
+        }
       }
     });
     setShowStyleDesigner(false);
+    setEditingStyleIndex(null);
+  };
+
+  const handleEditStyle = (index: number, mode: 'primary' | 'secondary') => {
+    setStyleDesignerMode(mode);
+    setEditingStyleIndex(index);
+    setShowStyleDesigner(true);
+  };
+
+  const [availableStyles, setAvailableStyles] = useState<any[]>([]);
+  const [loadingStyles, setLoadingStyles] = useState(false);
+
+  const loadAvailableStyles = async () => {
+    try {
+      setLoadingStyles(true);
+      const response = await apiClient.get('/api/effect-styles/');
+      const allStyles: any[] = [];
+      Object.values(response.data).forEach((typeGroup: any) => {
+        if (typeGroup.pre_designed) {
+          allStyles.push(...typeGroup.pre_designed);
+        }
+        if (typeGroup.custom) {
+          allStyles.push(...typeGroup.custom);
+        }
+      });
+      setAvailableStyles(allStyles);
+    } catch (error) {
+      console.error('Failed to load effect styles:', error);
+    } finally {
+      setLoadingStyles(false);
+    }
+  };
+
+  const handleLoadStyle = async (styleId: number) => {
+    try {
+      const response = await apiClient.get(`/api/effect-styles/${styleId}`);
+      const style = response.data;
+      
+      // Convert API response to EffectStyleConfig format
+      const effectorConfig = Array.isArray(style.effector_config)
+        ? style.effector_config[0] || {}
+        : style.effector_config || {};
+      
+      const effectStyleConfig: EffectStyleConfig = {
+        name: style.name,
+        style_type: style.style_type,
+        subtype: style.subtype,
+        description: style.description || '',
+        process_verb: style.process_verb || '',
+        execution_probability: style.execution_probability,
+        effector: effectorConfig,
+        effectors: Array.isArray(style.effector_config) ? style.effector_config : [effectorConfig],
+        style_attributes: style.style_attributes,
+      };
+      
+      handleAddEffectStyle(effectStyleConfig);
+      setShowLoadStyleModal(false);
+    } catch (error: any) {
+      console.error('Failed to load effect style:', error);
+      alert(`Failed to load effect style: ${error.response?.data?.detail || error.message}`);
+    }
   };
 
   const handleRemovePrimaryStyle = (index: number) => {
@@ -175,15 +279,46 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
         <p className="section-description">
           Primary styles are mutually exclusive - only one executes per turn. Selection is based on subtype or relative weights.
         </p>
-        <button
-          className="add-style-btn"
-          onClick={() => {
-            setStyleDesignerMode('primary');
-            setShowStyleDesigner(true);
-          }}
-        >
-          + Add Primary Effect Style
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+              className="add-style-btn"
+              onClick={() => {
+                setEditingStyleIndex(null);
+                setStyleDesignerMode('primary');
+                setShowStyleDesigner(true);
+              }}
+            >
+              Add Primary Effect Style
+            </button>
+            <select
+              className="add-style-btn"
+              style={{ 
+                marginLeft: '0.5rem',
+                appearance: 'auto',
+                paddingRight: '2rem',
+                cursor: 'pointer'
+              }}
+              onChange={(e) => {
+                if (e.target.value === 'new') {
+                  setEditingStyleIndex(null);
+                  setStyleDesignerMode('primary');
+                  setShowStyleDesigner(true);
+                  e.target.value = '';
+                } else if (e.target.value === 'load') {
+                  setShowLoadStyleModal(true);
+                  loadAvailableStyles();
+                  e.target.value = '';
+                }
+              }}
+              value=""
+            >
+              <option value="" disabled>▼</option>
+              <option value="new">New...</option>
+              <option value="load">Load...</option>
+            </select>
+          </div>
+        </div>
         {(formData.primary_effect_styles || []).length > 0 && (
           <div className="style-list">
             {(formData.primary_effect_styles || []).map((style, index) => (
@@ -195,12 +330,21 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
                     {style.style_type} • Probability: {style.execution_probability}
                   </div>
                 </div>
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemovePrimaryStyle(index)}
-                >
-                  Remove
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleEditStyle(index, 'primary')}
+                    style={{ background: 'rgba(74, 158, 255, 0.2)', color: '#4a9eff', borderColor: 'rgba(74, 158, 255, 0.3)' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleRemovePrimaryStyle(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -212,15 +356,46 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
         <p className="section-description">
           Secondary styles execute independently based on their execution probability.
         </p>
-        <button
-          className="add-style-btn"
-          onClick={() => {
-            setStyleDesignerMode('secondary');
-            setShowStyleDesigner(true);
-          }}
-        >
-          + Add Secondary Effect Style
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+              className="add-style-btn"
+              onClick={() => {
+                setEditingStyleIndex(null);
+                setStyleDesignerMode('secondary');
+                setShowStyleDesigner(true);
+              }}
+            >
+              Add Secondary Effect Style
+            </button>
+            <select
+              className="add-style-btn"
+              style={{ 
+                marginLeft: '0.5rem',
+                appearance: 'auto',
+                paddingRight: '2rem',
+                cursor: 'pointer'
+              }}
+              onChange={(e) => {
+                if (e.target.value === 'new') {
+                  setEditingStyleIndex(null);
+                  setStyleDesignerMode('secondary');
+                  setShowStyleDesigner(true);
+                  e.target.value = '';
+                } else if (e.target.value === 'load') {
+                  setShowLoadStyleModal(true);
+                  loadAvailableStyles();
+                  e.target.value = '';
+                }
+              }}
+              value=""
+            >
+              <option value="" disabled>▼</option>
+              <option value="new">New...</option>
+              <option value="load">Load...</option>
+            </select>
+          </div>
+        </div>
         {(formData.secondary_effect_styles || []).length > 0 && (
           <div className="style-list">
             {(formData.secondary_effect_styles || []).map((style, index) => (
@@ -232,12 +407,21 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
                     {style.style_type} • Probability: {style.execution_probability}
                   </div>
                 </div>
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemoveSecondaryStyle(index)}
-                >
-                  Remove
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleEditStyle(index, 'secondary')}
+                    style={{ background: 'rgba(74, 158, 255, 0.2)', color: '#4a9eff', borderColor: 'rgba(74, 158, 255, 0.3)' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleRemoveSecondaryStyle(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -338,8 +522,51 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
           <div className="style-designer-container">
             <EffectStyleDesigner
               onSave={handleAddEffectStyle}
-              onCancel={() => setShowStyleDesigner(false)}
+              onCancel={() => {
+                setShowStyleDesigner(false);
+                setEditingStyleIndex(null);
+              }}
+              initialStyle={editingStyleIndex !== null ? (
+                styleDesignerMode === 'primary' 
+                  ? formData.primary_effect_styles?.[editingStyleIndex]
+                  : formData.secondary_effect_styles?.[editingStyleIndex]
+              ) : undefined}
             />
+          </div>
+        </div>
+      )}
+
+      {showLoadStyleModal && (
+        <div className="modal-overlay" onClick={() => setShowLoadStyleModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Load Effect Style</h2>
+              <button className="modal-close" onClick={() => setShowLoadStyleModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {loadingStyles ? (
+                <p>Loading styles...</p>
+              ) : availableStyles.length === 0 ? (
+                <p>No effect styles found.</p>
+              ) : (
+                <div className="config-list">
+                  {availableStyles.map((style) => (
+                    <div
+                      key={style.id}
+                      className="config-item"
+                      onClick={() => handleLoadStyle(style.id)}
+                    >
+                      <div>
+                        <strong>{style.name}</strong> ({style.subtype})
+                        <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.6)', marginTop: '0.25rem' }}>
+                          {style.style_type} • {style.description || 'No description'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
