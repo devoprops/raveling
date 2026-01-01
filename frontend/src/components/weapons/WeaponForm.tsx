@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import apiClient from '../../utils/api';
 import { EffectStyleConfig } from '../effectstyles';
 import EffectStyleDesigner from '../effectstyles/EffectStyleDesigner';
@@ -67,9 +67,14 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
   }, [formData, onChange]);
 
   // Update formData when initialData changes (e.g., when loading a config)
+  // Use JSON.stringify to detect deep changes
+  const prevInitialDataStr = useRef<string>('');
+  
   useEffect(() => {
-    if (initialData) {
-      setFormData({
+    const currentDataStr = JSON.stringify(initialData);
+    // Only update if initialData actually changed
+    if (currentDataStr !== prevInitialDataStr.current && initialData) {
+      const newFormData: WeaponFormData = {
         name: initialData.name ?? '',
         short_desc: initialData.short_desc ?? '',
         long_desc: initialData.long_desc ?? '',
@@ -86,7 +91,9 @@ export default function WeaponForm({ initialData, onChange }: WeaponFormProps) {
         size_constraints: initialData.size_constraints ?? [0, 100],
         thumbnail_path: initialData.thumbnail_path ?? '',
         restrictions: initialData.restrictions ?? {},
-      });
+      };
+      setFormData(newFormData);
+      prevInitialDataStr.current = currentDataStr;
     }
   }, [initialData]);
 

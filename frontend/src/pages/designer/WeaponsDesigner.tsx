@@ -76,7 +76,26 @@ export default function WeaponsDesigner() {
     try {
       const response = await apiClient.get(`/api/weapons/load-config/${configName}`);
       const loadedConfig = response.data.weapon_config;
-      setWeaponConfig(loadedConfig);
+      // Ensure all required fields are present with defaults
+      const completeConfig: WeaponFormData = {
+        name: loadedConfig.name ?? '',
+        short_desc: loadedConfig.short_desc ?? '',
+        long_desc: loadedConfig.long_desc ?? '',
+        weight_kg: loadedConfig.weight_kg ?? 0,
+        length_cm: loadedConfig.length_cm ?? 0,
+        width_cm: loadedConfig.width_cm ?? 0,
+        material: loadedConfig.material ?? '',
+        effectors: loadedConfig.effectors ?? [],
+        primary_effect_styles: loadedConfig.primary_effect_styles ?? [],
+        secondary_effect_styles: loadedConfig.secondary_effect_styles ?? [],
+        affinities: loadedConfig.affinities ?? createDefaultAffinities(),
+        detriments: loadedConfig.detriments ?? createDefaultDetriments(),
+        auxiliary_slots: loadedConfig.auxiliary_slots ?? 0,
+        size_constraints: loadedConfig.size_constraints ?? [0, 100],
+        thumbnail_path: loadedConfig.thumbnail_path ?? '',
+        restrictions: loadedConfig.restrictions ?? {},
+      };
+      setWeaponConfig(completeConfig);
       setShowLoadModal(false);
       alert(`Loaded weapon config: ${configName}`);
     } catch (error: any) {
@@ -107,7 +126,7 @@ export default function WeaponsDesigner() {
       <div className="weapons-designer-content">
         <div className="weapons-designer-main">
           <div className="weapons-designer-form-section">
-            <WeaponForm initialData={weaponConfig} onChange={handleFormChange} />
+            <WeaponForm key={weaponConfig.name || 'new'} initialData={weaponConfig} onChange={handleFormChange} />
           </div>
           <div className="weapons-designer-preview-section">
             <PreviewTabs weaponConfig={weaponConfig} />
