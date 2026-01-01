@@ -1,7 +1,7 @@
 """Weapon damage analysis utilities for simulating weapon effects."""
 
 import random
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from src.utils.common.distributions import (
     create_distribution_function,
     sample_uniform,
@@ -86,10 +86,10 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
                 selected_style_id = None
                 
                 if selected_primary:
-                    primary_damage = _execute_style_damage(selected_primary)
+                    primary_damage, individual_damages = _execute_style_damage_with_breakdown(selected_primary)
                     strike_damage += primary_damage
-                    if primary_damage > 0:
-                        damage_values.append(primary_damage)
+                    # Add individual damage values from all effectors
+                    damage_values.extend(individual_damages)
                     
                     selected_style_id = selected_primary.get("name", "") or selected_primary.get("subtype", "")
                 
@@ -112,10 +112,10 @@ def simulate_damage(weapon_config: Dict[str, Any], num_strikes: int) -> Dict[str
                 
                 execution_prob = style.get("execution_probability", 1.0)
                 if random.random() < execution_prob:
-                    style_damage_this_strike = _execute_style_damage(style)
+                    style_damage_this_strike, individual_damages = _execute_style_damage_with_breakdown(style)
                     strike_damage += style_damage_this_strike
-                    if style_damage_this_strike > 0:
-                        damage_values.append(style_damage_this_strike)
+                    # Add individual damage values from all effectors
+                    damage_values.extend(individual_damages)
                 
                 style_breakdown[style_id].append(style_damage_this_strike)
                 style_cumulative_totals[style_id] += style_damage_this_strike
@@ -223,15 +223,70 @@ def _select_primary_style(primary_styles: List[Dict[str, Any]], subtype: Optiona
 
 def _execute_style_damage(style: Dict[str, Any]) -> float:
     """
-    Execute a style's effector and return damage amount.
+    Execute a style's effectors and return total damage amount.
+    
+    Supports both single effector (backwards compat) and multiple effectors (new format).
+    Processes all damage effectors and sums their damage.
     
     Args:
         style: Style configuration dictionary
         
     Returns:
+        Total damage amount (0.0 if no damage effectors or execution fails)
+    """
+    total_damage, _ = _execute_style_damage_with_breakdown(style)
+    return total_damage
+
+
+def _execute_style_damage_with_breakdown(style: Dict[str, Any]) -> Tuple[float, List[float]]:
+    """
+    Execute a style's effectors and return total damage amount and individual damages.
+    
+    Supports both single effector (backwards compat) and multiple effectors (new format).
+    Processes all damage effectors and sums their damage.
+    
+    Args:
+        style: Style configuration dictionary
+        
+    Returns:
+        Tuple of (total_damage, list_of_individual_damages)
+    """
+    total_damage = 0.0
+    individual_damages = []
+    
+    # Handle multiple effectors (new format)
+    effectors = style.get("effectors", [])
+    if effectors and isinstance(effectors, list):
+        for effector in effectors:
+            damage = _execute_single_effector(effector)
+            if damage > 0:
+                total_damage += damage
+                individual_damages.append(damage)
+    else:
+        # Handle single effector (backwards compat)
+        effector = style.get("effector", {})
+        if effector:
+            damage = _execute_single_effector(effector)
+            if damage > 0:
+                total_damage += damage
+                individual_damages.append(damage)
+    
+    return total_damage, individual_damages
+
+
+def _execute_single_effector(effector: Dict[str, Any]) -> float:
+    """
+    Execute a single effector and return damage amount.
+    
+    Args:
+        effector: Effector configuration dictionary
+        
+    Returns:
         Damage amount (0.0 if not damage or execution fails)
     """
-    effector = style.get("effector", {})
+    if not effector:
+        return 0.0
+    
     effector_type = effector.get("effector_type", "")
     
     if effector_type != "damage":
@@ -249,7 +304,7 @@ def _execute_style_damage(style: Dict[str, Any]) -> float:
         damage = _sample_damage(dist_type, params)
         return max(0.0, damage)
     except Exception as e:
-        print(f"Warning: Failed to sample damage for style {style.get('name', 'unknown')}: {e}")
+        print(f"Warning: Failed to sample damage for effector: {e}")
         return 0.0
 
 

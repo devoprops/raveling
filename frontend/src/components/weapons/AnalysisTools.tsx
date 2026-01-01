@@ -24,8 +24,10 @@ interface AnalysisData {
   cumulative_damage: number[];
   damage_values: number[];
   damage_per_strike: number[];
-  effector_breakdown: Record<string, number[]>;
-  effector_cumulative: Record<string, number[]>;
+  effector_breakdown?: Record<string, number[]>;
+  effector_cumulative?: Record<string, number[]>;
+  style_breakdown?: Record<string, number[]>;
+  style_cumulative?: Record<string, number[]>;
   min_damage: number;
   max_damage: number;
 }
@@ -47,8 +49,14 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
 
   const runAnalysis = async () => {
-    if (!weaponConfig.name || !weaponConfig.effectors || weaponConfig.effectors.length === 0) {
-      setError('Please configure the weapon with at least one effector before running analysis.');
+    // Check for effect styles (new system) or effectors (legacy)
+    const hasEffectStyles = 
+      (weaponConfig.primary_effect_styles && weaponConfig.primary_effect_styles.length > 0) ||
+      (weaponConfig.secondary_effect_styles && weaponConfig.secondary_effect_styles.length > 0);
+    const hasEffectors = weaponConfig.effectors && weaponConfig.effectors.length > 0;
+    
+    if (!weaponConfig.name || (!hasEffectStyles && !hasEffectors)) {
+      setError('Please configure the weapon with at least one effect style or effector before running analysis.');
       return;
     }
 
@@ -70,7 +78,7 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
     }
   };
 
-  // Prepare cumulative data with per-effector breakdown
+  // Prepare cumulative data with per-effector or per-style breakdown
   const cumulativeData = useMemo(() => {
     if (!analysisData) return [];
 
@@ -80,10 +88,19 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
         Overall: analysisData.cumulative_damage[index],
       };
 
-      // Add per-effector cumulative damage
-      Object.keys(analysisData.effector_cumulative).forEach((effectorId) => {
-        point[effectorId] = analysisData.effector_cumulative[effectorId][index];
-      });
+      // Add per-style cumulative damage (new system)
+      if (analysisData.style_cumulative) {
+        Object.keys(analysisData.style_cumulative).forEach((styleId) => {
+          point[styleId] = analysisData.style_cumulative![styleId][index];
+        });
+      }
+      
+      // Add per-effector cumulative damage (legacy)
+      if (analysisData.effector_cumulative) {
+        Object.keys(analysisData.effector_cumulative).forEach((effectorId) => {
+          point[effectorId] = analysisData.effector_cumulative![effectorId][index];
+        });
+      }
 
       return point;
     });
@@ -91,7 +108,7 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
     return data;
   }, [analysisData]);
 
-  // Prepare damage vs call data with per-effector breakdown
+  // Prepare damage vs call data with per-effector or per-style breakdown
   const damageVsCallData = useMemo(() => {
     if (!analysisData) return [];
 
@@ -101,10 +118,19 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
         Overall: analysisData.damage_per_strike[index],
       };
 
-      // Add per-effector damage per strike
-      Object.keys(analysisData.effector_breakdown).forEach((effectorId) => {
-        point[effectorId] = analysisData.effector_breakdown[effectorId][index];
-      });
+      // Add per-style damage per strike (new system)
+      if (analysisData.style_breakdown) {
+        Object.keys(analysisData.style_breakdown).forEach((styleId) => {
+          point[styleId] = analysisData.style_breakdown![styleId][index];
+        });
+      }
+      
+      // Add per-effector damage per strike (legacy)
+      if (analysisData.effector_breakdown) {
+        Object.keys(analysisData.effector_breakdown).forEach((effectorId) => {
+          point[effectorId] = analysisData.effector_breakdown![effectorId][index];
+        });
+      }
 
       return point;
     });
@@ -142,17 +168,54 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
     }));
   }, [analysisData]);
 
-  // Get effector info for legend
-  const effectorInfo = useMemo(() => {
-    if (!weaponConfig.effectors) return [];
-    return weaponConfig.effectors.map((effector: any, idx: number) => ({
-      id: effector.effector_name || `effector_${idx}`,
-      name: effector.effector_name || `Effector ${idx + 1}`,
-      color: getEffectorColor(effector),
-      type: effector.effector_type,
-      element: effector.element_type,
-    }));
-  }, [weaponConfig.effectors]);
+  // Get style or effector info for legend
+  const styleOrEffectorInfo = useMemo(() => {
+    const info: Array<{id: string; name: string; color: string; type?: string; element?: string}> = [];
+    
+    // Add effect styles (new system)
+    if (weaponConfig.primary_effect_styles) {
+      weaponConfig.primary_effect_styles.forEach((style: any, idx: number) => {
+        const styleId = style.name || style.subtype || `primary_style_${idx}`;
+        const effector = style.effector || (style.effectors && style.effectors[0]) || {};
+        info.push({
+          id: styleId,
+          name: style.name || `Primary Style ${idx + 1}`,
+          color: getEffectorColor(effector),
+          type: effector.effector_type,
+          element: effector.element_type,
+        });
+      });
+    }
+    
+    if (weaponConfig.secondary_effect_styles) {
+      weaponConfig.secondary_effect_styles.forEach((style: any, idx: number) => {
+        const styleId = style.name || style.subtype || `secondary_style_${idx}`;
+        const effector = style.effector || (style.effectors && style.effectors[0]) || {};
+        info.push({
+          id: styleId,
+          name: style.name || `Secondary Style ${idx + 1}`,
+          color: getEffectorColor(effector),
+          type: effector.effector_type,
+          element: effector.element_type,
+        });
+      });
+    }
+    
+    // Add effectors (legacy)
+    if (weaponConfig.effectors && info.length === 0) {
+      weaponConfig.effectors.forEach((effector: any, idx: number) => {
+        info.push({
+          id: effector.effector_name || `effector_${idx}`,
+          name: effector.effector_name || `Effector ${idx + 1}`,
+          color: getEffectorColor(effector),
+          type: effector.effector_type,
+          element: effector.element_type,
+        });
+      });
+    }
+    
+    return info;
+  }, [weaponConfig.primary_effect_styles, weaponConfig.secondary_effect_styles, weaponConfig.effectors]);
 
   return (
     <div className="analysis-tools">
@@ -223,15 +286,15 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                   dot={false}
                   name="Overall"
                 />
-                {effectorInfo.map((effector) => (
+                {styleOrEffectorInfo.map((item) => (
                   <Line
-                    key={effector.id}
+                    key={item.id}
                     type="monotone"
-                    dataKey={effector.id}
-                    stroke={effector.color}
+                    dataKey={item.id}
+                    stroke={item.color}
                     strokeWidth={2}
                     dot={false}
-                    name={effector.name}
+                    name={item.name}
                   />
                 ))}
               </LineChart>
@@ -266,15 +329,15 @@ export default function AnalysisTools({ weaponConfig }: AnalysisToolsProps) {
                   dot={false}
                   name="Overall"
                 />
-                {effectorInfo.map((effector) => (
+                {styleOrEffectorInfo.map((item) => (
                   <Line
-                    key={effector.id}
+                    key={item.id}
                     type="monotone"
-                    dataKey={effector.id}
-                    stroke={effector.color}
+                    dataKey={item.id}
+                    stroke={item.color}
                     strokeWidth={2}
                     dot={false}
-                    name={effector.name}
+                    name={item.name}
                   />
                 ))}
               </LineChart>
