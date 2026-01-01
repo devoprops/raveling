@@ -1,0 +1,59 @@
+name: test iron shortsword
+short_desc: small iron shortsword for testing
+long_desc: this is a description for a small iron shortsword test artifact
+weight_kg: 0
+length_cm: 0
+width_cm: 0
+material: iron
+effectors: []
+primary_effect_styles:
+- name: slash gaussian
+  style_type: Physical
+  subtype: slash
+  description: bladed weapon slash with gaussian distribution
+  process_verb: slash
+  execution_probability: 1
+  effector:
+    effector_type: damage
+    effector_name: slash gaussian_effector
+    damage_subtype: physical
+    base_damage: 15
+    distribution_parameters:
+      type: gaussian
+      params:
+        mean: 15
+        std_dev: 3
+  style_attributes:
+    range: 1
+    area: 1
+secondary_effect_styles: []
+affinities:
+  elemental:
+    Earth: 1
+    Water: 1
+    Air: 1
+    Fire: 1
+    Lightning: 1
+    Ice: 1
+    Poison: 1
+    Sonic: 1
+    Psychic: 1
+  race: {}
+detriments:
+  elemental:
+    Earth: 1
+    Water: 1
+    Air: 1
+    Fire: 1
+    Lightning: 1
+    Ice: 1
+    Poison: 1
+    Sonic: 1
+    Psychic: 1
+  race: {}
+auxiliary_slots: 0
+size_constraints:
+- 0
+- 100
+thumbnail_path: ''
+restrictions: {}
